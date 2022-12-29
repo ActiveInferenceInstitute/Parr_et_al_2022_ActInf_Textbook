@@ -1,0 +1,620 @@
+﻿Appendix A: Mathematical Background
+
+This appendix offers an introduction (or a refresher) to the basic mathematical techniques employed throughout this book. We provide an introductory (but nonexhaustive) overview of four topics: linear algebra, Taylor series approximation, variational calculus, and stochastic dynamics. For each of these techniques, we refer to where it comes into play in the book. Our aim here is to provide a focused introduction—with emphasis on building intuition as opposed to formal and rigorous proofs. The maths required to understand and use Active Inference is not complicated, but its multidisciplinary basis means it is often difficult to find resources that bring together the necessary prerequisites. We hope this appendix goes some way toward remedying this.
+
+A.2 Linear Algebra
+
+A.2.1 The Basics
+
+Linear algebra refers to a notation used to simply and concisely express combinations of multiplications and summations. It relies on matrices and vectors comprising arrays of numbers in structures with multiple rows and columns (or multiple rows and a single column, for a vector). The element of a matrix A in the ith row and jth column is referred to as A¡¡. The product A of two matrices B and C (or a matrix and vector) is defined as follows:
+
+A = BC
+
+(A.1)
+
+Aij = Σ BikCkj k
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+A.1 Introduction
+
+
+Appendix A
+
+For this definition to hold, we need the number of columns of B to match the number of rows of C. However, let us instead say that the number of columns of B match the columns in C and we want to express the following sum:
+
+Ajj = Σ BkiCkj
+
+(A.2)
+
+How would we do this using linear algebraic notation? We need to appeal to another operation that swaps the subscripted indices of B (i.e., reflects the array such that the columns become rows and vice versa). This is the transpose operation, normally expressed using a superscript T:
+
+B = Bki A = BTC B.C
+
+Aij = Σ BkiCkj
+
+(A.3)
+
+Equation A.3 shows how we can use the transpose operator to express the summation from equation A.2. The second line highlights an alternative notation using a dot operator. This notation is inspired by the fact that, when B and C have only one column each, equation A.3 reduces to a vector dot product.
+
+Another useful operation is the trace operator. This takes the elements along the diagonal of a square matrix and sums them:
+
+tr[A] = Σ, Aji
+
+(A.4)
+
+Part of the utility of a trace operator is afforded by the way we can permute elements in the trace of a matrix product:
+
+tr[ABC] = AjBjCki = Σ₂ Σ₁ Σ₁Cki AjBjk = tr[CAB] = Σ, Σ₂ Σ, B&CKA=tr[BCA]
+
+(A.5)
+
+The main use we will find for this identity in this book is when applied to scalar quantities. A scalar can be viewed as a matrix with only one row and one column. As such, we can apply a trace operator to it, but this will not do anything we get the same scalar out. This means that, if a matrix product gives rise to a scalar quantity, we can permute the terms as above.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+226
+
+
+Mathematical Background
+
+For example, if we have a square matrix B with N columns and rows, and a vector c with N rows, we can use equation A.5 to show the following:
+
+a = c. Bc = tr[c¹ Bc] = tr[BccT] = tr[BC]
+
+(A.6)
+
+C=c0c² ccT
+
+This reexpresses a quadratic expression (first line) with the trace of the product of two matrices (penultimate line). The final line defines the outer product (in contrast to the inner dot product). Equation A.6 becomes particularly useful in the context of multivariate normal distributions, as we will come to in section A.2.3.
+
+The final concepts of linear algebra to be aware of are the inverse and determinant of a matrix. An inverse is defined as follows:
+
+A-¹A = AA-¹ = I
+
+(A.7)
+
+Equation A.7 says that the product of a matrix and its inverse is the identity matrix-a square matrix with ones along its main and zeros elsewhere. Multiplying any matrix by the identity matrix returns the original matrix, unchanged. It is the linear algebraic equivalent of scalar multiplication by 1 (which could be interpreted as a 1-dimensional identity matrix). This means that if we multiply something by a matrix, and then by the inverse of that matrix, we end up with the original quantity.
+
+The determinant is a useful quantity but one for which it is harder to develop a clear intuition. The only point at which it appears in this book is as part of the normalizing constant of a multivariate normal distribution. As such, it is worth knowing how it is calculated, but we will not dwell on this concept. The determinant is defined recursively as follows:
+
+(A.8)
+
+|A|ª Σ, (-1)³-¹ A₁i| A\(1,5)||
+
+Here, the notation A\(1,1) means the matrix A with row 1 and column i omitted. For example:
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+227
+
+
+228
+
+Appendix A
+
+A11 A12 A-[AA] = A21 A22 A(1, 1) = A22 A(1,2)= A21 |A|=A₁1 |A22 - A12 |A21| = A₁1A22 - A12A21
+
+(A.9)
+
+This concludes our outline of the basic operations of linear algebra.
+
+A.2.2 Derivatives
+
+Differentiation of matrix and vector quantities follows directly from the application of standard calculus to each element of a matrix. For example, if we have a matrix B whose elements are functions of a scalar x, the derivative of B with respect to x is as follows:
+
+A(x)=d, B(x) ⇒ A(x)¡j = Əx B(x) ij a əx dx =
+
+(A.10)
+
+However, a few important definitions and identities will be useful in understanding the technical details in this book. The first is how to take derivatives with respect to nonscalar quantities. If we have a vector quantity b that is a function of another vector c, the derivative of b with respect to c is a matrix:
+
+A = db(c) ⇒ Ajj = dc, b(c);
+
+We will also make use of the gradient operator, which deals with derivatives with respect to a vector. This is defined as follows:
+
+Vo = [am dm₂ am ...] ² ды дрз a = = V₂x(b)
+
+a₁ = d₂₁x(b)
+
+(A.11)
+
+(A.12)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+
+Mathematical Background
+
+The definition of the gradient operator as a vector of derivative operators also affords a concise definition of a related quantity-the divergence of a vector function:
+
+V₁.b(a) = Σ,dab(a);
+
+(A.13)
+
+There are many useful derivative identities for linear algebraic quantities, but we will not attempt to provide a comprehensive overview; for readers who wish to delve further, we recommend The Matrix Cookbook (Petersen and Pedersen 2012). Here, we limit ourselves to two identities that will be particularly useful. The first is the gradient of a quadratic quantity:
+
+d(a) = V₁(b(a) · Cb(a))
+
+d(a); = da; Σ; Σ b(a); Cjxb(a)k
+
+= Σ;Σ, ((da, b(a); )Cjk b(a)₁ + (da,b(a)₁ )C₁kb(a); )
+
+d(a) = V₁b(a). (C+CT) b(a)
+
+(A.14)
+
+Here (and throughout this book), the transposition implied by the dot notation is applied prior to the gradient operator:
+
+V₁b(a) · (...) ª V₁b(a)¹ (...) ‡ (V₂b(a))¹ (...)
+
+(A.15)
+
+The identity in equation A.14 is used in the derivation of the beliefupdate equations for predictive coding in chapter 4. A second useful identity is the derivative of the same quantity with respect to the matrix, C:
+
+D(a)¡¡ = dc;j Σk Σ,b(a)kCâ¡b(a)} = b(a);b(a); D(a) = Vc(b(a) · Cb(a)) D(a) = b(a) b(a)
+
+(A.16)
+
+Here we have used the gradient operator with a matrix subscript to indicate the following:
+
+Vc = den ac21 dc₁2 дСzz
+
+(A.17)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+229
+
+
+230
+
+Appendix A
+
+In appendix B, we will see how equation A.16 aids in the estimation of the covariance matrix for a posterior probability.
+
+A.2.3 Probabilities
+
+In the context of probabilistic reasoning, these linear algebraic identities come into play in two important situations. The first is when the random variable we are reasoning about (i.e., the support of a probability distribution) is a vector quantity. The second is when the probability distribution itself is described by sufficient statistics that are vectors, matrices, or higher order tensor quantities.¹ An example of both is the multivariate normal distribution, defined as follows:
+
+p(x) = (27)x|M|)³* e^2(x-n)-1(x-n) (2π)k dim(x) = k
+
+(A.18)
+
+Here, x is a k-dimensional vector. This means the mode, n, is also a k-dimensional vector. The precision, II, is the inverse of the covariance-a kxk dimensional symmetric matrix expressing the dispersion of probability mass around the mode. This appears twice in equation A.18: in the normalizing constant (as a determinant) and in the exponent. Note that the quadratic term in the exponent is a scalar quantity and is therefore susceptible to the identity in equation A.6. This will be important in appendix B.
+
+When dealing with categorical probability distributions, the sufficient statistics of a distribution are simply vectors, matrices, or tensors of probabilities. For example, the probability distribution over the numbers a person could roll on a six-sided die is given by a 6-dimensional vector, with each element of the vector expressing the probability of that number. Things get more interesting in the context of conditional probabilities. For variables o and s, which each take one of several possible values, we can write the conditional probability of o given s as a matrix, A, whose elements are as follows:
+
+P(o= i|s = j) = Aij
+
+(A.19)
+
+This says that the probability that o takes its ith possible value if s takes its jth possible value is given by the element of A in the ith row and jth column. Taking this further, we can define conditional probabilities in which there are multiple items in the conditioning set, leading to a tensor structure:
+
+P(o= i|s₁ = j, S₂ = K, S3 = 1, ...) = Aijkl...
+
+(A.20)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+
+Mathematical Background
+
+Here we could specify an arbitrary number of variables in the conditioning set, leading to an arbitrary number of indices, and a tensor of arbitrary order. We set out an example of a (T-maze) model in chapter 7 that makes use of a probability tensor of order 3. The principles of this model generalize to any higher order. For a tensor A, we will consistently use the dot notation of equation A.3 to mean summation with respect to the first index:
+
+A = B. x ⇒>> Ajklm... Σ Bijklm... X₁
+
+(A.21)
+
+An advantage of this expression of distributions as arrays of numbers is that we can use the definitions in sections A.2.1-A.2.2 to find concise expressions for related quantities. For example, we will often need to compute information-theoretic quantities like entropies for probability distributions. An entropy is a negative expected (average) log probability. If we take the expression in equation A.19, we can find a simple form for its entropy as follows:
+
+H[P(o|s)] -Ep(os) [In P(o|s)] H, = H[P(o|s=j)] =-Σ,P(0 = i|s = j) In P(0 = i|s = j) H = -diag (A. In A)
+
+(A.22)
+
+In equation A.22, diag is an operation that takes the diagonal elements of a matrix and stacks them into a vector. This illustrates an example in chapter 4 of defining the expected free energy, in which an appeal to linear algebraic notation offers a concise description of how these quantities may be calculated.
+
+A.3 Taylor Series Approximation
+
+A.3.1 Introduction
+
+Often, it is convenient to simplify the form of a function (f(x)) through an approximation (indicated by ^) that is valid in a local region (e.g., the region around a point, a). If we were only interested in the function at a, we
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+231
+
+
+Appendix A
+
+could replace the function with a constant equal to the function evaluated at that point:
+
+f(x) = f(a)
+
+(A.23)
+
+However, this is only valid when x is exactly equal to a. In order to make the approximation valid in the region immediately surrounding a, we can add a term to ensure that a small change in x is accompanied by a change in the value of the function consistent with the gradient at a:
+
+ƒ(x) = f(a) + εdxf(x)|x=a
+
+ε = x - a
+
+(A.24)
+
+When x is equal to a, the ɛ term is zero, consistent with equation A.23. In addition, the first derivative of the original function and of the approximation are equal, when evaluated at a.
+
+Pursuing this approach, we can add an additional term that accounts for the rate of change of the gradient (i.e., the curvature) so that the approximation becomes valid for a greater deviation from a. We do not have to stop here; we could add an arbitrary number of terms to match each successive derivative between the original function and the approximation:
+
+ƒ(x) = f(a) + €ə¸ ƒ (x)\x=a + ½⁄2 €²№z f(x)|\x=a
+
+= Σ₁-e¹¹f(x)\x-a n=0
+
++...
+
+(A.25)
+
+Equation A.25 shows the Taylor series expansion in one dimension. However, we can generalize this to the multivariate case (where x is a vector) with the following expression:
+
+f(x) = f(a) + e · V₁₂ f (x)\₁a + 1⁄2 e · V₂ (V₂ f (x)) ² | ² |x=a · Vx ) 1x=a E +...
+
+(A.26)
+
+The quantity (Vxf(x))T is known as a Hessian matrix.
+
+Increasing the number of terms in the series improves the approximation. For our purposes, we need not go beyond the second order (quadratic) expansion. In the following subsections, we highlight the places in this book in which this approximation has been exploited. These include the Laplace approximation, which underwrites the predictive coding schemes described in chapters 4 and 8 and the variational Laplace scheme used for
+
+1
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+232
+
+
+Mathematical Background
+
+model-based data analysis described in chapter 9. In addition, the generalized coordinates of motion used to model continuous trajectories (box 4.2) can be interpreted as Taylor series coefficients. We will unpack these applications in sections A.3.2 and A.3.3, respectively.
+
+A.3.2 The Laplace Approximation
+
+An important application of a Taylor series approximation in probabilistic inference is its use in the Laplace approximation. This refers to the use of a Gaussian distribution to approximate a probability distribution (p) in the region surrounding its mode (u). If we expand the log of a probability distribution using equation A.26, we get the following:
+
+In p(x) = ln p(µ) + ε · V¸ ln p(x)|x=µ + ·
+
+-ɛ · V₂ (V, In p(x))' ‚_‚¸ ε
+
+1
+
+ε = x-μ
+
+(A.27)
+
+This is simply equation A.26 but with f(x) = Inp(x) and a = μ. The first term after the approximate equality is constant with respect to x so may be absorbed into a normalizing constant. The second term disappears, as the gradient of the log probability at its mode is zero. Exponentiating both sides leaves us with this:
+
+1 1 Xx) = -=—= € 7²2² ²0²¹ 6 Z p(x) = N(μ, C-¹) C-¹ ^-V. (V, In p(x))
+
+(A.28)
+
+Equation A.28 says that when we approximate a log probability using a quadratic function, near its mode, the associated probability density is Gaussian. This is the Laplace approximation applied to a probability distribution. However, we can also apply the Laplace approximation to a free energy functional. To provide some intuition for this, we start with a free energy functional (see chapter 4):
+
+F[q,y] =Eg(x) [Inq(x) - In p(y,x)]
+
+|x= μl
+
+(A.29)
+
+Equation A.29 expresses free energy in terms of the expected difference between two log probabilities. The q density is an approximate posterior probability. The p density is a generative model, describing how hidden states
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+233
+
+
+Appendix A
+
+(x) give rise to data (y). As in equation A.27, we can apply a Taylor series expansion to the two log probabilities. Starting with the variational density, we have this:
+
+In q(x) ≈ Inq(µ) + (x −— µ). V¸ Inq(x) |x-µ X
+
++ ½ (x − µ) · Vx (Vx Inq(x))(x-μ) 1x = μ ⇒q(x) = N(µ, Σ¯¹) Σ-¹ = -V, (V₂ In g(x))|u = arg max q(x) X x=μl
+
+(A.30)
+
+Applying the expectation from equation A.29 to equation A.30, we get this: Eqx) [In q(x
+
+)] In q(u)-₁(x) [(x-μ). Σ¹(x-μ)] = Inq(u) - trΣ¹ Eq(x) [(x − µ)(x − µ)¹] =-In 27-In Σ - = -1 In(2πe)*|Σ
+
+(A.31)
+
+Here, k is the dimensionality of x. The move from the first to the second line depends on the trace identity in equation A.6. The first two terms in the third line come from the definition of a multivariate normal distribution (equation A.18). Equation A.31 expresses the first term of equation A.27 under the Laplace assumption. The second term of equation A.27 can similarly be expanded around u:
+
+In p(y,x) ≈ In p(y, µ) + (µ − x). V¸ ln p(y,x)|x=μ
+
++ + 12 (μ-x). V, (V, In p(y,x))", (μ- x) Eq(x)[ln p(y,x)] ≈ In p(y, µ) + (µ — Eq(x)[x]) ▼¸ ln p(y,x) |x-µ 2
+
+(A.32)
+
+1 + ½ tr Eg(x)[(µ − x)(µ − x)¹]V¸ (V¸ ln p(y,x))' 2 = In p(y, μµ) + 1 tr[2V, (V, In p(y, x))"] p(y,x))"|-]
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+234
+
+
+Mathematical Background
+
+The final equality uses the fact that, if q is a normal distribution, its mean is also its mode. Substituting equations A.31 and A.32 back into equation A.27, we get the Laplace free energy:
+
+F[q,y] =——-—In(2ñe)^|Σ|— In p(y, µ). - 1/2 tr[EV. (V₂ In p(y,x))"] (A.33) X =
+
+The trace operator in the last term ca be ignored when x is 1-dimensional. The useful thing about this formulation is that if we set the derivative of the free energy with respect to the posterior precision to zero, we find the following:2
+
+d₂F[q,y] =0>¹=V₂ (V, In p(y,x))"
+
+(A.34)
+
+This means that the precision of the posterior is the negative curvature of the log probability of states and data evaluated at the posterior mode. As such, minimizing free energy does not require explicit optimization of the precision this may be computed analytically from the posterior mean. Furthermore, substitution of A.34 into A.33 reveals that the only term in the free energy that depends on the posterior mean is the log probability over data and states. For details of how this is done to perform inference in continuous state-space models, see chapter 4.
+
+A.3.3 Generalized Coordinates of Motion
+
+In addition to being central to the Laplace approximation, the Taylor series approximation plays another important role in Active Inference. This is in the use of generalized coordinates of motion to represent beliefs about a trajectory through time. In brief, this means drawing inferences not only about the position of a variable (x) but also its velocity (x'), acceleration (x"), and subsequent temporal derivatives. These implicitly represent an approximation to the trajectory that can be made explicit through the following Taylor series:
+
+x(t) = x(t) + €x²(t)\,_, + — e²x"(t) = + 12 | +... t=t
+
+(A.35)
+
+ε = t-t
+
+This additionally means we can account for structure in the covariance of random fluctuations, as is necessary in dealing with these fluctuations in biological systems (where fluctuations are themselves generated by dynamical processes). We will discuss this further in section A5. For now, we simply
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+x= μ
+
+235
+
+
+Appendix A
+
+note that a probability density over the generalized coordinates of motion is equivalent to a distribution over local trajectories constructed by treating the coordinates as coefficients of a Taylor series expansion.
+
+A.4 Variational Calculus
+
+A.4.1 Functional Derivatives
+
+Because Active Inference deals with optimizing beliefs (probability distributions), it is often necessary to talk about the minimization of functionals (functions of functions) with respect to functions. This calls for the concept of a functional (i.e., variational) derivative. The basic problem is finding the function (f) that minimizes a functional (S), normally expressed as an integral³ of a function that includes f:
+
+p(x) = arg min S[f(x)] f X2 S[f(x)] = [ L(f(x),x) dx X1
+
+(A.36)
+
+If we parameterize the function in terms of an arbitrary function (g) that is zero at the extremes of the integral and multiply this by a small number (u), we can take the derivative of S with respect to u:
+
+f(x,u) = o(x) + ug (x) X2 ə„S[ƒ(x,u)]= §³„L(ƒ(x,u), x) dx X1 X2 = §ðµƒ(x,u)əƒL(ƒ(x,u), x) dx X1 X2 = Ï g(x)ə¡L(f(x,u), x) dx X1
+
+(A.37)
+
+When u is zero, fis the function that minimizes the integral. This means equation A.37 should be zero when evaluated at u= 0. The condition that must be satisfied for fto minimize S is then as follows:
+
+X2 [ 8(x)‡ƒL(f(x),x) dx|f=ø= = 0 X1
+
+(A.38)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+236
+
+
+Mathematical Background
+
+For equation A.38 to be true for any arbitrary g(x), the following is implied:4 8fS = dfL = 0 (A.39)
+
+Note that, in a physics setting, L may include the gradient of fin addition to the function itself. The same steps outlined above then give rise to the Euler-Lagrange equation:
+
+d S f S = d f L — 4 df²L = 0 dx f' = axf
+
+(A.40)
+
+Depending on whether includes the gradient, equations A.39 and A.40 express the notion of a variational (aka functional) derivative.
+
+A.4.2 Variational Bayes
+
+Variational Bayes follows in a relatively straightforward way from the above if we set f to be a factor of an approximate posterior distribution and S to be a free energy functional:
+
+f(x) = qi(x₁)
+
+q(x) = 9:(x₁)
+
+(A.41)
+
+L(q;(x;), x;) = ſq(x)(In q(x) — ln p(y,x)) dx¡#i S[q(x)] = F[q(x), y]
+
+The second line here expresses a mean-field approximation, in which the approximate posterior is factorized over the variables x. This is often used for reasons of computational tractability. However, this is one of many choices of form for the approximate posterior. Applying equation A.39, we find the form of the approximate posterior that minimizes the free energy (omitting constants):
+
+Sq F[q,y] = Inq;(x;) - Iq;(x;) In p(y,x) dx ¡¡
+
+Sq.F[q,y] =0⇒ In qi(x) = Eqi[ln p(y,x)]
+
+(A.42)
+
+The notation i should be read as "all factors except for the ith factor." Equation A.42 is central to an inference scheme known as variational message passing (Winn and Bishop 2005, Dauwels 2007). This works by optimizing each factor of q independently and relies on p being relatively sparse
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+i
+
+237
+
+
+238
+
+Appendix A
+
+(i.e., not every x, depends on every other x;). To gain some intuition for this, consider what happens with an (arbitrary) example:
+
+p(y,x) = p(y|x₁)P(X1|X2, X3)P(X3)P(X2|X4)P(X4)
+
+In q(x₁) = = Eq(x₂)q(x3)q(x4) In p(y|x₁) + In p(x₁ | x₂, X3) + ln p(x3)P(X2|X4) P(x4) constant w.r.t. X₁ In q(x₂) = = Eq(x₁)q(x3)q(x₁)| In p(x₁|X2, X3) + In p(x2 | x4) + In p(y|x₁)p(x3)P(X4) constant w.r.t. X₂ (A.43)
+
+Equation A43 shows what happens when we substitute the density in the first line into equation A.42 for the first two factors of q. Omitting constant terms, we have this:
+
+Inq(x₁) = In p(y|x₂)+ Eg(x₂)q(x₂) [In p(x₁|X₂, X3)]
+
+Inq(x₂) = Eqx)(x) [In p(x₁ X₂, X₂)] + Eqx) [In p(x₂|x4)] (2,
+
+(A.44)
+
+The terms in the expectation have been simplified by noting the following:
+
+Epôv)[ƒ(a)] = [p(b)f (a) db = f(a) ſ p(b) db = f(a)
+
+(A.45)
+
+This accounts for the simplicity of variational message passing, in which we only need take account of a small subset of beliefs (those about the Markov blanket-see box 4.1) in order to update each belief.
+
+A.5 Stochastic Dynamics
+
+A.5.1 Stochastic Differential Equations
+
+There are a few places in this book where we refer to ideas from the theory of random dynamical systems. In chapter 3, for instance, we highlight the importance of a steady-state distribution to which a random system tends over time and the relationship between these dynamics and the notion of self-evidencing. In chapters 4 and 8, we outline how a continuous state-space model may be formulated in terms of stochastic differential equations.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+
+Mathematical Background
+
+Although this is a fascinating topic (Yuan and Ao 2012), a full dissection of the subtleties of defining stochastic processes is outside the scope of this book. However, it is worth briefly unpacking what we mean by a stochastic differential equation. Put simply, it is a differential equation that is augmented by a random term (@):
+
+x = f(x) + w @~ N(0, T-¹)
+
+(A.46)
+
+The random term here is chosen to be normally distributed. It has a mean of zero, such that the most likely value for the rate of change of x is simply f(x). The interpretation of equation A.46 is sometimes a little tricky. The best way to dispel any ambiguity is to see it as the limiting case of a discretized scheme:
+
+Ax = f(x)At + w(At) ² AT 0⇒x= f(x) + @
+
+(A.47)
+
+Note that if the variance of a varies with x there are multiple discretizations we could appeal to. The most common choices correspond to Ito and Stratonovich interpretations of a stochastic equation. However, we assume a fixed variance throughout this book-which ensures these interpretations lead to identical results. For the purpose of defining a generative model of the sort found in chapter 8, we just need the probability distribution describing the rate of change of x. From equation A.46, this is simply as follows:
+
+(A.48)
+
+p(x|x) = N(f(x), 1T-¹)
+
+This is the form that will be found in the generative models used here. This provides a summary of the distinction between a deterministic and a random dynamical system. If we know the value of x in a deterministic system, then we know its velocity. In a stochastic system, knowing x tells us the distribution of possible velocities we might expect.
+
+A.5.2 Nonequilibrium Steady State
+
+In chapter 3, we see that a system defined such that it descends some energy (or surprise) function maintains its form over time and persists at a (possibly nonequilibrium) steady state. We will briefly unpack what this means here, starting from the idea of a steady state and recovering the surpriseminimizing or "self-evidencing" (Hohwy 2016) dynamics. The starting point
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+239
+
+
+Appendix A
+
+is an alternative expression of the stochastic dynamics in equation A.46 in terms of a deterministic partial differential equation describing how the probability density changes over time. This is known as a Fokker-Planck equation (Risken 1996):
+
+ap(x) = V₁ (IV, p(x) – f(x)p(x)) X
+
+The Fokker-Planck equation lets us define a steady state simply by setting the partial derivative of the density with respect to time to be zero:
+
+ap(x) = 0
+
+(A.49)
+
+⇒>>
+
+V (TVxp(x)-f(x)p(x)) = 0
+
+(A.50)
+
+f(x)=(r= Q(x))V, I(x) Vx. (Q(x)Vx p(x)) = 0 3(x) = -ln p(x)
+
+The third equality here5 is key, as it says that those systems that maintain steady state must exhibit dynamics that (on average) minimize their surprise (3). The Q term allows for dynamics along the contours of the surprise, which neither increase nor decrease surprise. This expression underwrites the self-evidencing perspective of Active Inference and is central to the physics of sentient systems. We will not dwell on this here but refer readers to Friston (2019a) for a more comprehensive overview of the consequences of this treatment.
+
+A.5.3 Generalized Coordinates of Motion
+
+As we saw in section A.3.3, we can represent a short trajectory in terms of the coefficients of a Taylor series expansion in time. This raises an interesting question when we translate this into the context of a stochastic setting. When specifying a continuous-time model in terms of generalized coordinates of motion, how do we account for the covariance between the orders of generalized motion? The answer is given in Cox and Miller (1965), which we summarize here. A random process is expressed in generalized coordinates as a vector of the random fluctuations accompanying the flow, the rate of change of that flow, and subsequent temporal derivatives:
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+240
+
+
+Mathematical Background
+
+241
+
+* = f(x) + õ || D @[⁰] @' @[1] @" @[²] @[3] @ @"
+
+(A.51)
+
+The random fluctuations may be characterized as follows:
+
+p(a) = N(0, 1)
+
+E[⁰](T)] = 0
+
+E[w] (7).wº(t)] = Σ
+
+Their autocorrelation function is this:
+
+-1 p(h) = Σ¯¹ E[wlº] (T) · w[⁰] (t + h)] Covariance
+
+(A.52)
+
+(A.53)
+
+We can multiply both sides of this equation by the variance to show that the covariance between the noise at two time-points may be factorized into an autocorrelation and a variance. We define the ith derivative of the random fluctuations as this limiting case:
+
+wli-1] (t + At) − w[i-1](t) AT wil(T, AT):
+
+(A.54)
+
+Using equations A.52 and A.53, we can express the covariance between a variable and its first temporal derivative:
+
++ h)] E[w¹(t, At). wlº(t + h)] = ¼E[(w[º](t + At) − w[º](t)) w[º](t +, = 1Σ(p(h - Δt) – p(h)) (A.55)
+
+Taking the limit as the change in time tends to zero:
+
+E[w¹(7) wo(t + h)] = Σp(h)
+
+(A.56)
+
+Evaluating at h = 0 gives us a covariance of zero, as the instantaneous velocity and position are orthogonal to one another (and the autocorrelation is at a maximum, so its temporal derivative is zero).
+
+We can take this procedure one step further and evaluate the variance of the first derivative:
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+
+Appendix A
+
+E[w¹(T, AT). @¹] (t + h, AT)]
+
+= ΣE[(wlº] (t + At) − wlºl(t))(wlºl(t+h+ At) − wlº(t + h))] = Σ((p(h) – p(h − At)) – ¦ (p(h + At) − p(h))) (A.57)
+
+Taking the limit as AT→0, this is as follows:
+
+E[w¹(7) w¹(t + h)]=-Σp(h) .
+
+(A.58)
+
+Pursuing this procedure for subsequent derivatives allows us to compute the elements of the generalized precision matrix:
+
+Π = 21 0 1 0 0 -p (0) (0) 0 ö (0) 0 (0)
+
+(A.59)
+
+Choosing the autocorrelation function to be Gaussian, we have the following:
+
+-1
+
+p(0) = 1 p(0) = 0 p(0) = -λ *(0) = 0 (0)= 32² p(h) = ean² p(h) = -2p(h) p(h) = 2(2h² - 1)p(h) p(h) = 2²h(2h² - 3)p(h) ö(h) = λ² (λ²h² – 6λh²+3)p(h) (A.60)
+
+The precision term (2) can then be thought of as parameterizing the smoothness of the random fluctuations. This may itself be optimized in relation to data through minimization of free energy.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004464/c009800_9780262369978.pdf by guest on 30 March 2022
+
+242

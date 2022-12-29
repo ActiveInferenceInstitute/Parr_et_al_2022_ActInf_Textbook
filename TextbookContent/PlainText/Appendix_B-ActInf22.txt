@@ -1,0 +1,537 @@
+﻿Appendix B: The Equations of Active Inference
+
+In this appendix, we provide a mathematical summary of Active Inference. This supplements the equations in the mainchapters with details about where they come from and aims to fill in some of the intermediate steps omitted there. This builds directly on the mathematical background of appendix A and deals with inference in partially observed Markov decision (POMDP) processes and predictive coding architectures, and it touches on questions of structure learning and model reduction alluded to in the main text. Our aim is for this to be relatively self-contained, with particular focus on topics that frequently cause confusion. Readers should be reassured that it is not necessary to understand everything in this appendix to be able to usefully apply Active Inference; this is more for those who want greater technical detail.
+
+B.2 Markov Decision Processes
+
+B.2.1 State Inference
+
+When solving a POMDP problem, our aim is to select the appropriate course of action, or policy. Under Active Inference, this is framed as an inference problem, in which we must find a posterior probability distribution over alternative policies. To calculate a posterior probability, we need two things: the prior probability of policies (addressed in section B.2.2) and the likelihood of observations given a policy. This section focuses on the latter.
+
+The likelihood of observations given a policy is not straightforward to compute. This is because a POMDP problem is structured so that policies (™)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+B.1 Introduction
+
+
+Appendix B
+
+influence trajectories (indicated by ~) of states (s) that influence outcomes (0) without a direct influence of policies on outcomes. The problem then involves a sum over trajectories of states to marginalize these out and find a marginal likelihood of observations given policies:
+
+P(õ| π) = Σ P(õ|Š)P(Š|π)
+
+(B.1)
+
+For any nontrivial state-space, this summation can be very challenging to compute, from a computational perspective. However, as we see in chapter 2, we can approximate marginal likelihoods of this sort using a free energy functional. Chapters 2-4 describe free energy as a functional of two things: approximate posterior beliefs (Q) and a generative model (P). This lets us express the free energy for a given policy as follows:
+
+F(π) = EQ(3) [ln Q(Ŝ| π) – ln P(õ‚Š |π)]>-In P(õ|π) Q(57) = arg min F(π) ⇒ F(π) ≈ −ln P(õ|^) Q
+
+(B.2)
+
+Equation B.2 tells us something simple but important. To be able to infer what to do, we need to approximate a marginal likelihood of a policy. To find a good approximation of this marginal likelihood, we need to optimize our beliefs about states under that policy. In short, perceptual inference is mandated for planning to proceed. So how do we solve this problem practically? The answer is to appeal to the methods outlined in section A.4.2. By choosing explicit forms for the probability distributions in equation B.1, we can find a simple expression for the free energy:
+
+Q(³|π)= I₂Q(s₂|π): Q(s₁|ñ) = Cat(S™) P(õ|5)=P(0₂|s₂): P(0₁|s₂)=Cat(A) T P(S|π) = P(S₁)][₂P(Sr+1|S₁,π): P(S₁+1|S₁,π) = Cat (B™)
+
+(B.3)
+
+P(S₁) = Cat (D)
+
+Briefly, the first line of equation B.3 defines beliefs about states in terms of a mean-field approximation (see equation A.41), factorized over time. Each time-point is associated with a belief about what the state would be on pursuing a policy, given by the vector S whose elements are the probabilities of each alternative state. The trajectory of observations in the second line depends on a trajectory of hidden states, with the matrix (or tensor, if
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+244
+
+
+The Equations of Active Inference
+
+the states are further factorized) A indicating the distribution over observations for each state. Similarly, the prior trajectory of states under a model comprises the transition probabilities under that policy (B) and the initial state probabilities (D). Substituting these into the free energy expression in Equation B.2, we arrive at the following expression for the free energy under a policy:
+
+F₂ = S1 • (In S1 - In A. 0₁ - InD) + ΣS (In Sæt – In A · 0₂ – ln Bπ Sπ-1) (B.4) t=2 .
+
+Note that the dot product of a probability vector with another quantity is equivalent to the expectation operation. See section A.2.1 if this is not clear. Equation B.4 treats the outcomes as if they were probability vectors, but with a one in the element corresponding to the observed outcome and zeros elsewhere (sometimes called one-hot encoding or 1-in-k vector). The challenge now is to minimize the free energy with respect to our beliefs about states (S) to ensure the free energy becomes a good approximation to a marginal likelihood. We could do this as in section A.4.2 and minimize with respect to each factor of our beliefs one at a time, iterating through until they converge. However, as we are interested in more biologically plausible schemes, we can instead construct a dynamical system that converges on the same solution. This approach is known as a gradient descent, as we follow the free energy gradients downward until we arrive at the minimum.
+
+To update beliefs about states, we take the gradient of this with respect to current beliefs about states. We then define an auxiliary variable (v) that plays the role of the log posterior and set this to perform a gradient descent on the free energy. This log posterior is then passed through a softmax function¹ (o) to convert it to a normalized probability distribution. This process ensures that beliefs about the states change such that they decrease free energy.
+
+Sπ = O(VT) V π = - VS FI V₁_F₁ = lns - In A 0 - ln BS-1 - InB+1 •S, Sat T 'πτ+1
+
+(B.5)
+
+Equation B.5 has the same solution to the variational message passing scheme outlined in equation A.42. It allows for efficient computation of
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+245
+
+
+Appendix B
+
+case, from posterior beliefs using only locally derived information (in this sensory data, beliefs about the immediate past and beliefs about the immediate future). However, it is worth noting that the mean-field approximation used here (factorization over time) often leads to overconfident posteriors. In practice, this may be countered using a modified scheme called marginal message passing (Friston, FitzGerald et al. 2017; Parr, Markovic et al. 2019):
+
+ὑπ = επτ
+
+(B.6)
+
+πτ &π = In A. 0₂ + ¹ (ln(B₁Sπ-1) + In(B*+¹SπT+1)) - Ins B&B πτ
+
+This leads to more conservative inferences, with greater uncertainty ascribed to posterior beliefs. Other alternatives have been explored, including the Bethe approximation (Schwöbel et al. 2018). However, at the time of writing, the most widely used implementation of Active Inference employs marginal message passing.
+
+B.2.2 Planning as Inference
+
+The above section deals with inference about states conditioned on some policy to minimize a free energy conditioned on the policy. This free energy plays the role of a negative log marginal likelihood (model evidence), wherein each policy is treated as a model. Equipping this with prior and posterior beliefs about the most likely policy, we can express the free energy as a functional of beliefs about policies.
+
+F = EQ() [ln Q(z) - In P(t,0)]
+
+Eq(7)[lnQ(π) + F(π) − In P(π)]
+
+≈ =
+
+(B.7)
+
+P(n) = Cat (π)
+
+Q(n) = Сat(π)
+
+π = = o(ln E - G)
+
+The approximate equality in the second line comes from equation B.2. Here, E is a vector of fixed beliefs about policies (this may be thought of as a bias, or habit, term), while G is the expected free energy for each policy. As before, we can now write the free energy in terms of sufficient statistics:
+
+F = (lnл-ln E+F+G)
+
+(B.8)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+246
+
+
+The Equations of Active Inference
+
+Here, F is a vector whose elements are F, as defined in equation B.4. Taking the gradients, we find the optimal update for beliefs about policies (i.e., planning): V₁₂F = 0 ⇒
+
+π = o(ln E - F - G)
+
+B.2.3 Learning
+
+(B.9)
+
+To enable learning, we need to incorporate prior beliefs about the parameters of the probability distributions that comprise the generative model. As these are expressed as categorical distributions, the appropriate (conjugate) choice of prior is a Dirichlet distribution. Taking the prior over initial states as an example, the terms in the free energy that depend on the expected (log) prior include the following:
+
+F = ··· + Dk[Q(D) || P(D)] — Eq(s)q(D) [In P(s₁|D)] =··· + (d-d). Eq(D)[lnD] — $₁ · Eq(D) [InD]
+
+(B.10)
+
+Eq(D) [InD] = y(d) – y(d₁) do = Σ;d; Q(D) = Dir(d) P(D) = Dir(d)
+
+Equation B.10 highlights in the third equality a useful identity. The expectation of the log of a Dirichlet distributed variable is the difference between two digamma functions (y)-where the digamma function is the derivative of a gamma function. We can use equation B.10 to find the free energy minimum:
+
+V[ID]F=d-d-s₁ = 0 ⇒d=d+s₁
+
+Σ.0.0. T
+
+a = a +
+
+(B.11)
+
+This gives a simple scheme that may be used to update prior Dirichlet parameters to their posterior values. Very similar update rules apply for the other probability distributions that comprise the generative model:
+
+bπ = bπ + Σ₂² πτ πτ
+
+SOS.
+
+c = c + + Σ₂0₁ d=d + S₁
+
+e=e+T
+
+πτ-1
+
+(B.12)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+247
+
+
+248
+
+Appendix B
+
+These simply say that when the thing predicted by the relevant term in the probability distribution comes to pass (which may be a combination of two things for conditional probabilities), we simply augment that element of the probability array to signal that it is more likely to happen again in the future.
+
+B.2.4 Precision
+
+In some settings, it may be convenient to parameterize the generative model in a slightly different way. One option here is to use a Gibbs measure, where probability distributions are equipped with an inverse temperature parameter that plays the role of a precision. Most commonly, this is done for the precision (y) over policies:
+
+P(T|Y) = Сat(no) To = o(-yG)
+
+(B.13)
+
+For simplicity, we omit the E vector for this section. In what follows, we will also consider a precision for the likelihood () and for transitions (w). The prior distribution over precision parameters is assumed to be a gamma distribution:
+
+P(S) ~ Be exp(-BS) P(w) P exp(-Bow) ∞ P(y) ~ B, exp(-₂y)
+
+(B.14)
+
+The approximate posterior distributions have the same (gamma distribution) form, and we will use a bold beta hyper-parameter to distinguish between the sufficient statistics of the posterior and prior above. A useful property of the gamma distribution, when parameterized in this way, is the following:
+
+= Eq[S] =B¹ -
+
+@= Eq) [w] =B¹
+
+Y = Eqr) [y] =B¹
+
+(B.15)
+
+Having defined these distributions, we can write the variational free energy:
+
+F = E[F(π, , w) + DKL[Q(π) || P(T|y)]]
+
++ Dkz[Q(y) || P(y)] + DÂ[Q(w) || P(w)] + Dk[Q(S) || P(S)]
+
+(B.16)
+
+-1
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+
+The Equations of Active Inference
+
+This can be expressed in terms of its sufficient statistics (omitting constants):
+
+F = (F+In+y · G + ln Z(y)) + Inß, + Inß + Inßç
+
+- In ß, - In ßo - Inßç + yß₂ + wß… + CB5
+
+F₁-
+
+In BS-1 - In Z(C). O₂ – In Z(w)S-1) S, S (In A. 0₂ +
+
+(B.17)
+
+In equation B.17, Z represent stants) given by the following: partition functions (i.e., normalizing con
+
+Z(S); = Σ, (A ;)5 Z(ω); – Σ. (Β...)" B. πτί a In Z()s=o. In A a In Z(w)ST-1 = S. ln B a, In Z(y) = - G Z(y) = Σ exp(-y-G₂) T ⇒> oo (In A)s, sº = o(ln Bπt)Smt-1 πτ πτ To = o(-yG)
+
+(B.18)
+
+Taking the partial derivative² with respect to the expected precisions gives this:
+
+de F Bg F = 0⇒ Ba F By Σ(0²-0₂). In A + B T. (St Σ₁ T - S · Sπ) · ln BÃSÃ−1+ Bo -1 (π – πo). G + B₂ - (
+
+B.19)
+
+Expressing these updates as biologically plausible gradient descents gives the resulting equations:
+
+B B₁ B₁ . Σ(0-0₂). In A + B − B¢ Σ · (sº - Sπ) · In B´Sπ-1 + ßo- ßø T (π- πo) G+By - B,
+
+(B.20)
+
+T
+
+Note that the dimensionality implies a (row) vector of precisions for A, where each state (column of A) is associated with its own precision parameter.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+249
+
+
+Appendix B
+
+B.2.5 Expected Free Energy
+
+Expected free energy is discussed extensively in the main text of the book. In this section, we supplement this discussion with two things. First, we offer a brief outline of current thinking as to why this is the appropriate quantity to define prior beliefs about policies. Second, we touch on the implementational details for computing this quantity.
+
+While numerical simulations (of the sort illustrated in chapter 7) have established that expected free energy is useful, the question of why it is useful is still an active research area. Anticipating that this discussion will continue to evolve, here we set down a brief summary of the most parsimonious explanation at the time of writing (Da Costa et al. 2020; Friston, Da Costa et al. 2020). The starting point is to stipulate that a system attains some steady state (see section A.5.2) or, equivalently, fulfills its preferences (defined here in relation to latent states) at some future time (7):
+
+Q(S₂) = Eq(n) [Q(S₂|T)] = P(S₂|C) (π)
+
+(B.21)
+
+Our challenge is to find the Q(7) that satisfies equation B.21. To do so, we note that equation B.21 implies the following:
+
+Dkt. [Q(π | S₂ )Q(S₂) || Q(π|s₂)P(s₂ |C)]=0 KL
+
+(B.22)
+
+EQ,s) [In Q(T, S₂)] = Eq(t,s₂) [InQ(π | s₂) + In P(s₂ |C)]
+
+We next factorize the left-hand side so as to isolate the Q(π) term we are interested in:
+
+EQ(x) [In Q(x)] = EQ(s) [InQ(z|s₂) + In P(s₂|C)- In Q(s,
+
+t)]
+
+(B.23)
+
+We define a variable a that represents the ratio of two entropies:
+
+α = Equs) [H[Q(x|s₂)]] EQ(ST) [H[P(0₂|S₂)]]
+
+(B.24)
+
+Heuristically, a expresses the relative range of behavioral outputs (i.e., policies) that are plausible in a given state, compared to the range of outcomes expected in that same state. If very large, this might describe a creature whose behavior bears little relationship to the state of their world, despite highly precise sensory observations being generated by that world. When very small, this might describe a creature who always behaves the same way
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+250
+
+
+(B.27)
+
+The Equations of Active Inference
+
+when it knows the state of the world but is rarely offered precise data about that world. Here, we will stipulate that we are interested in systems whose α = 1-implying a relatively balanced and symmetrical exchange with their world. This renders the two entropies in equation B.24 equal. Returning to equation B.23:
+
+BQ(x) [In Q(x)]=-Equs) [H[Q(T|S₂)]] + EQ(7,sz) [In P(s₂|C) – InQ(s₂|π)] =-BQ() [H[P(o, s.)]] - EQ(7) [DK₁. [Q(S₂ | π) || P(S₂|C)]] KL
+
+(B.25)
+
+The second line follows from the first and from equation B.24 with α = 1. We now see that equation B.25, and therefore equation B.21, is satisfied by choosing the following:
+
+InQ(π) = -EQ (se|7) [H[P(0₂|S₂)]] – Dkt [Q(S₂|π)||P(s₂|CKL Risk Expected ambiguity
+
+)]
+
+(B.26)
+
+Our final step is to note the relationship between the quantity on the right-hand side and the expected free energy-with preferences defined in terms of observations in place of states:
+
+EQ(sx) [H[P(0, s.)]] + DK [Q(S₂) || P(SIC)] = EQ(sl) [H[P(0, s.)]] + DL[Q(S₂) || P(s,|C)] + EQ(Sz|7)P(0₂|S; ) [In P(0₂|S₂)] — EQ(s;\7)P(0₂|s;) [In P(0₂|s₂)]
+
+= Eq(s; 7) [H[P(0₂|s₂)]] + Dkt [Q(0₂, Sz|π) || P(0₁, S₂|C)] KL = Eq(sl) [H[P(0, s.)]] + Dkt. [Q(0₂) || P(0₂|C)] + EQ(x) [DKT. [Q(S₂10,,T) || P(S₂|0,,C)]] KL
+
+> EQ (ST) [H[P(0₂|S₂)]] + D₁ [Q(0₂|π) || P(0₂|C)]=G(π) KL
+
+The steps in equation B.27 have (perhaps a little tediously) been included in some detail as our experience is that people often struggle with this result. The inequality in the final line arises from the omission of the (nonnegative) KL-Divergence in the previous line. The key result here is that the ambiguity and risk minimized for the most plausible policies in equation B.26 acts as an upper bound on the expected free energy used throughout this book.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+251
+
+
+Appendix B
+
+We now turn to the question of computational implementation. Here we can simply appeal to the linear algebraic identities we saw in section A.2. It is straightforward, if we express preferences as a vector of prior probabilities (C), to express the pragmatic term of the expected free energy as follows:
+
+EQ07) [In P(0₂|C)] = 0. In C₁ Q(0₂|n) = Cat (0) π = ASπt
+
+(B.28)
+
+The expected information gain associated with hidden states (i.e., salience, epistemic value, or Bayesian surprise) is expressed in terms of the difference between two entropies:
+
+H[Q(0₂|π)] − EQ(Sz\r)[H[P(0,|s₂ )]] = -0. Ino - H. STT H -diag (A. In A)
+
+(B.29)
+
+See Section A.2.3 for an explanation of the last line. Putting equations B.28 and B.29 together, the expected free energy is this:
+
+G₁ = Σ₂Gπt πτ T
+
+Gπ =H. Sπt + On (Inor - In C₂)
+
+(B.30)
+
+When we need to account for active learning, we supplement this with parameter information gain. The information gain associated with parameters of the generative model (i.e., novelty) may be derived as follows. Using the KL-Divergence between two Dirichlet distributions, we can express the information gain that would occur following a given stateoutcome combination:
+
+Wij = Dk[P(Ajj | 0 = i, s = j) || P(A₁;)]
+
+= (InÃ(a¡¡) – InÃ (a¡¡ + 1))+ (lnÃ(ªo; + 1) − ln(ªo;))
+
+(B.31)
+
++y(a¡¡ + 1) − y(ªo¡ + 1)
+
+-In dij
+
++Indoj
+
+Σ,ª
+
+doj
+
+Here we have used the fact that if we knew a given state-outcome combination had occurred, we would add 1 to the associated Dirichlet parameter. This lets us use a standard identity of a log gamma function (as indicated by the underbraces) to simplify the expression:
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+252
+
+
+The Equations of Active Inference
+
+253
+
+(B.32)
+
+aoi aj (a¡¡ +¹) da; (ao; + 1)
+
+= In + ajj Wij = = In doj 1 дан Г(а; ) + + a¡¡Ã (a¡¡) ajj Γ(α;;) ªo;I (ªoj) 1 doj дао; г(ао;) r(aoj)
+
+Here we have used the identity xÃ(x)=[(x+1) and an application of the product rule. We next use the identity y(x)F(x)=dx(x) and the approximation y(x) = ln x - (2x)-¹ to simplify this:
+
+1 1 Aij 1 2aii doj + In 1 200i doj + - ¥(a¡¡) — (ao;)
+
+(B.33)
+
+The expected information gain is then as follows:
+
+EQ(OST) [DKL[P(A| 0₁, S₂ ) || P(A)]] ≈ 0π · WSπ πτ
+
+(B.34)
+
+This simple expression then aug ents the expected free energy to ensure novelty-seeking behavior in addition to pragmatic and salient choices.
+
+B.2.6 Bayesian Model Reduction
+
+In chapter 7, we briefly touch on the idea of structure learning and model reduction. We take the opportunity to unpack the principles in a little more depth here. Bayesian model reduction is a technique used to compare alternative models that differ only in their priors. Through Bayes' theorem (see chapter 2), we can express the ratio of the joint probability of data (y) and some parameters (0) between two alternative models in two different ways:
+
+P(y,0) _ P(y|0)P(0) _ P(0|y)P(y) P(y\0)P(0) P(0\y)P(y) = = P(y,0)
+
+(B.35)
+
+If the only difference between the two models is the prior (i.e., P(y | 0) = P(y|0)), then we can cancel the likelihood terms. On rearranging, this gives an expression for the posterior probability under alternative (reduced) priors in terms of the posterior probability under the original (full) priors:
+
+P(0|y)P(y)Ã(0) P(y)P(0) P(0|y) =
+
+(B.36)
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+
+Appendix B
+
+Integrating both sides with respect to the parameters gives this:
+
+P(y) P(0) P(y) P(0) 1 = -Ep(e\y) P(0) In P(y) = ln P(y) + In Ep(0\y) P(8)
+
+(B.37)
+
+Substituting back into equation B.36 gives this:
+
+In P(0|y) = In P(0|y) + In P(0) – In P(0) - In Ep(ely) P(0) P(0)
+
+Together, equations B.37 and B.38 mean that we can find the model evidence and posterior we would have got, had we used a given reduced prior, using the results from inverting a full model. We can reexpress these equations in terms of the variational quantities introduced in chapter 4:
+
+[P(0) P(0) F[P(0)] – F[P(0)] = In Eq(0)|
+
+(B.38)
+
+In Q(0) = In Q(0) + In P(0) – In P(0) – In Eq(e)
+
+P(0) P(0)
+
+(B.39)
+
+For reference, we offer the form of equation B.39 under two different kinds of prior. The first is a normal distribution:³
+
+P(0)= Ν(η,Σ)
+
+P(0) = N(ñ, Σ) Q(0) = N(μ,C) Q(0) = N(ū,Č)
+
+(B.40)
+
+Č-¹ = P = P + Ñ-п μ = Č(Pµ +Îñ - Пn)
+
+AF = − ¹ ln |ÑPÕΣ | + ½ (µ · Pµ + ñ · Ññ – n · În – µ · Îµ)
+
+Practically, this is used in the setting of mixed models, with a continuous and a categorical component. If each categorical outcome of the latter is associated with a continuous prior, we can efficiently evaluate the evidence for each of these priors (and therefore categorical outcomes) without having to invert each model in turn. See chapter 8 for an example.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+254
+
+
+More often, in a purely POMDP setting, we may be interested in comparing hypotheses about Dirichlet prior distributions. This has been used to simulate pruning of elements in a probability matrix as a metaphor for synaptic pruning during sleep (Friston, Lin et al. 2017). The form of Bayesian model reduction for Dirichlet distributions is as follows:
+
+P(0) = Dir(a) P(0) = Dir(ã) Q(0) = Dir(a) Q(0) = Dir(a)
+
+(B.41)
+
+ã= a +ã - a
+
+AF = In B(a) - In B(ã) + In B(ã) - In B(a)
+
+In this expression, B denotes a beta function. Similar results can be derived for a range of distributions (see Friston, Parr, and Zeidman 2018), but normal and Dirichlet priors are the most commonly encountered in Active Inference.
+
+B.3 (Active) Generalized Filtering
+
+We now move from the categorical inferences under a POMDP model to the continuous domain. This is where some of the preliminaries from appendix A really start to pay off. We will exploit the Laplace approximation and generalized coordinates of motion, both presented in section A.3. In addition, we will need to construct precision matrices including different orders of generalized motion, as we saw in section A.5.2. From equations A.33 and A.34 we can write the free energy under the Laplace approximation as follows:
+
+F[q,ÿ] = — -— -In(27)*|Ē | – In p(ỹ‚µ) q(x) = N(ũ, Ž-¹) Ž-¹ = - V₁ (V₂ In p(ỹ,x))™| x= μ
+
+Here we have expressed the free energy, using the Laplace assumption, for a model defined in generalized coordinates. Under the Laplace assumption, the only term in the first line that varies with u is the last one. This is the
+
+The Equations of Active Inference
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+(B.42)
+
+255
+
+
+Appendix B
+
+term expressing the generative model. Our next step is to specify the form of the generative model:
+
+p(ỹ,x,ỹ) = p(ỹ| Ñ‚ỹ)p(x|v)p(v) p(ỹ|x,v) = N((x, v),Î,) p(x |ỹ) = N(D · f(x‚v)‚Ñ‚) p(v) = N(ñ‚Ñx) Dx = f(x,v) + @x ỹ = g(x,v) + ,
+
+(B.43)
+
+Note we now have two hidden variables, x and v. The difference is that the former depends on an equation of motion (f), while the latter depends on a static prior. The D operator in the penultimate line is a matrix with ones above the leading diagonal. In generalized coordinates, this is equivalent to taking a temporal derivative, as each element in the vector of temporal derivatives is shifted up by one. The generalized precisions are constructed as in section A.5.3. Substituting the quantities of equation B.43 into B.42, we have the following:
+
+F[q,ỹ] = ¹, · Ñ‚č, + ½ěx ·Ñx čx + ½‰‚ · Ñ‚ čv y ·V
+
+−In p( ỹ |Ũx ,Ũv )
+
+E, =ỹ - ğ (μx, μv)
+
+- In p(ũx|μv)
+
+- In p(₂)
+
+ẵx = Dũx − ƒ (µx, µ‚)
+
+č, = μ₁₂ - ñ
+
+(B.44)
+
+We have omitted all constants with respect to u. From equation B.44, we can find the gradients of the free energy (using identities introduced in section A.2.2):
+
+V₁, Flq,y] =-V₁, 8-Ï‚ê‚ + Ð· Ñ‚ê‚ - V₁¸Î·Ï‚ēX μx V₁F[q,y] =-V₁8 ·Ï‚ê‚ - V₁ƒ · Ñ‚ê‚ + μ‚ēv μy
+
+(B.45)
+
+We could now specify a gradient descent to find the values of u that minimize free energy. However, this would imply that when the free energy is minimized, u becomes static. Clearly this is suboptimal if we believe higher orders of motion to be nonzero. To account for this, we can express a gradient descent in a moving frame of reference, such that when the free energy is minimized, u continues to move with velocity u':
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+256
+
+
+The Equations of Active Inference
+
+i, – Dũ, =V,g-I1 , - D.II , + Vaf-II, E - Y
+
+μ‚ – Dµ‚ = Vµ‚Š · Ñ‚ễy + V‚µ‚ƒ ·Ñ‚¤‚ − Î‚¤‚ . Hy ∙y 'y
+
+(B.46)
+
+Equation B.46 specifies a predictive coding scheme, in which prediction errors drive updates in expectations, resolving those errors. These schemes may be extended to include multiple hierarchical levels by duplicating the equations of B.46 for an additional level but replacing y with v from the lower level:
+
+▼Ã‚ƒÐ·Ñ‚ØÃÐ (i-1) (i-1) µ¦ – DµØ) = ▼µµõ¶¹) ·ÃÎ¶¯¹ µ¶¯¹) + ▼„„ƒÐ·ÑÎŸ µØ + Î¶ ē¶ V₁₂ V . V i – Dũ = Vg-II - D. +` (i-1) (i-1) -V Ev V č(i) = µ(i) — ğ (i+¹) (ũ(i+¹), ū(i+¹)) č(i) ± Dµ§) – ƒ®) (µ‚¦‚ Ã¦)
+
+(B.47)
+
+Under Active Inference, the free energy is minimized by perception but also by action. As the only thing action changes is the sensory input (y), most of the terms in equation B.44 are irrelevant for action. Minimizing the free energy with respect to action gives this:
+
+ú= -√„ỹ(u)·ÑÌ‚čy
+
+(B.48)
+
+Together, equations B.47 and B.48 provide a very general description of Active Inference for continuous state-space models. We will not discuss the issue of learning or mixed models in this section, as these are summarized in boxes 8.2 and 8.3, respectively.
+
+Downloaded from http://direct.mit.edu/books/oa-monograph/chapter-pdf/2004465/c010400_9780262369978.pdf by guest on 30 March 2022
+
+257
