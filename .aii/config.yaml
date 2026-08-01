@@ -1,6 +1,6 @@
 # AII sidecar — InstituteOS metadata. Schema: instituteos.platform.aii_sidecar
 meta:
-  updated: '2026-06-30'
+  updated: '2026-08-01'
 repo:
   name: Parr_et_al_2022_ActInf_Textbook
   slug: parr-et-al-2022-actinf-textbook
@@ -27,6 +27,27 @@ artifacts:
 - path: README.md
   kind: doc
   description: Repository overview.
+- path: LICENSE
+  kind: doc
+  description: CC-BY-4.0 license for repository content.
+- path: ActInf_Textbook_2022.pdf
+  kind: doc
+  description: Open-access textbook PDF (Parr, Pezzulo & Friston 2022, MIT Press).
+- path: TextbookContent/PlainText/
+  kind: data
+  description: Plaintext extractions of chapters 1-10, appendices A-C, and notes.
+- path: Chapters/VFE.jl
+  kind: code
+  description: Pluto.jl notebook - Variational Free Energy Simulator.
+- path: Chapters/test_vfe.jl
+  kind: test
+  description: Julia regression tests for the VFE simulator.
+- path: Chapters/03_blanket.ipynb
+  kind: notebook
+  description: Chapter 3 (Markov blankets) Jupyter notes.
+- path: scripts/clean_plaintext.py
+  kind: tool
+  description: Deterministic PlainText cleaning pipeline (footers/page numbers).
 provenance:
   license: CC-BY-4.0
   citation:

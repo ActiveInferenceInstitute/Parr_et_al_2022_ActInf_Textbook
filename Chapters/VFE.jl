@@ -39,14 +39,13 @@ likelihood = [l 1-l; 1-l l]
 
 # ╔═╡ 1580975e-d503-43e0-9255-a0745136d2be
 begin
-	true_observation = [1 0]'
-	
-	
-	likelihood_of_observation = likelihood' * true_observation
-	joint_probability = prior .* likelihood_of_observation
-	marginal_probability = sum(joint_probability, dims = 1)
-	posterior = joint_probability / marginal_probability
-	md"Exact Posteriors: $posterior[1, 1], $posterior[2]"
+	# Exact Bayesian inference for a binary hidden state x given the observation.
+	observation = [1, 0]                                       # one-hot encoding of observed y (y = 1)
+	likelihood_of_observation = likelihood * observation        # P(y = 1 | x), length-2 column
+	joint_probability = vec(prior) .* vec(likelihood_of_observation)  # P(x, y), elementwise
+	marginal_probability = sum(joint_probability)               # P(y)
+	posterior = joint_probability / marginal_probability        # P(x | y)
+	md"Exact posterior: $(posterior[1])=P(x=1|y), $(posterior[2])=P(x=2|y)"
 end
 
 # ╔═╡ d3084411-e7a0-4413-8cd0-8fee5fc712e5
@@ -54,17 +53,25 @@ s
 
 # ╔═╡ 57ace93e-ea63-46b7-bf74-f277f94f254a
 begin
-	function vfe(x)
-		f = x * (log(x - log(joint_probability[1])) + (1 - x) * (log(1 - x) - log(joint_probability[2])))
-		return f
+	# x * log(x / y) with the 0 * log(0) = 0 convention (handles boundary supports).
+	function xlogy(x, y)
+		x <= 0 ? zero(x) : x * log(x / y)
+	end
+
+	# Variational free energy F(q) as a function of the variational posterior q = Q(x = 1):
+	#   F(q) = KL[Q(x) || P(x | y)] - log P(y)
+	#        = q*log(q/p1) + (1-q)*log((1-q)/p2) - log P(y),
+	# which is minimized at q = P(x = 1 | y) = posterior[1].
+	function vfe(q)
+		xlogy(q, posterior[1]) + xlogy(1 - q, posterior[2]) - log(marginal_probability)
 	end
 end
 
 # ╔═╡ 7e970dfd-765c-4a30-a1f7-4b4e3d8d17a3
 begin
 	initial_approximate_posterior = prior
-	initial_f = vfe(s)
-	Markdown.parse("Variational Free Energy\$= $initial_f\$")
+	initial_vfe = vfe(prior[1])
+	Markdown.parse("Variational free energy at the prior: \$F = $initial_vfe\$ (the exact-posterior free energy is \$F = $(vfe(posterior[1]))\$)")
 end
 
 # ╔═╡ c35395bb-fea2-417d-8341-7bf540ab1e44
@@ -72,8 +79,10 @@ plotly()
 
 # ╔═╡ 5fd822c7-902e-46c9-a088-d54e198e507d
 begin
-	Priors = 0:0.01:1
-	plot(Priors, vfe)
+	qs = 0.0:0.001:1.0
+	p = plot(qs, vfe.(qs), label = "VFE F(q)", xlabel = "q = Q(x=1)", ylabel = "Variational free energy", title = "Variational Free Energy Simulator", legend = :top)
+	vline!([posterior[1]], label = "exact posterior q* = $(posterior[1])", linestyle = :dash)
+	p
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
