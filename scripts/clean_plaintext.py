@@ -22,7 +22,6 @@ invariant before reporting success.
 Usage:
   python3 scripts/clean_plaintext.py            # report only (no writes)
   python3 scripts/clean_plaintext.py --apply    # write cleaned files in place
-  python3 scripts/clean_plaintext.py --apply --verify-only  # revert? no: apply then re-verify
 """
 
 import argparse
