@@ -22,16 +22,18 @@ cross-cutting refactor.
 
 ## Medium
 
-- [ ] **M4 — Add contributor guidance.** Document the repository's scope,
+- [x] **M4 — Add contributor guidance.** Document the repository's scope,
   verification commands, generated-text workflow, and licensing. Path:
-  `CONTRIBUTING.md`. **Status: open.**
-- [ ] **M5 — Add citation metadata.** Add a `CITATION.cff` grounded in the
-  textbook citation and verified DOI. Path: `CITATION.cff`. **Status: open.**
-- [ ] **M6 — Make the review backlog auditable.** Replace the previous review
+  `CONTRIBUTING.md`. **Completed in `8ed6500`.**
+- [x] **M5 — Add citation metadata.** Add a `CITATION.cff` grounded in the
+  textbook citation and verified DOI. Path: `CITATION.cff`. **Completed in
+  `8ed6500`.**
+- [x] **M6 — Make the review backlog auditable.** Replace the previous review
   summary with dated Minor / Medium / Major sections and an explicit
-  open/deferred list. Path: `TODO.md`. **Status: in progress.**
-- [ ] **M7 — Record the review evidence.** Add a dated log of scope, findings,
-  and real verification results. Path: `REVIEW_LOG_2026-08-02.md`. **Status: open.**
+  open/deferred list. Path: `TODO.md`. **Completed in `8ed6500`.**
+- [x] **M7 — Record the review evidence.** Add a dated log of scope, findings,
+  and real verification results. Path: `REVIEW_LOG_2026-08-02.md`.
+  **Completed in `8ed6500`.**
 
 ## Major
 
