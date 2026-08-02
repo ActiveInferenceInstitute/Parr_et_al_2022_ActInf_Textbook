@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the source textbook and the repository."
+title: "Parr et al. 2022 — Active Inference Textbook"
+type: dataset
+repository-code: "https://github.com/ActiveInferenceInstitute/Parr_et_al_2022_ActInf_Textbook"
+license: CC-BY-4.0
+authors:
+  - family-names: Parr
+    given-names: Thomas
+  - family-names: Pezzulo
+    given-names: Giovanni
+  - family-names: Friston
+    given-names: Karl J.
+date-released: 2022
+version: "2022"
+identifiers:
+  - type: doi
+    value: 10.7551/mitpress/12441.001.0001
+    description: Open-access edition of the source textbook

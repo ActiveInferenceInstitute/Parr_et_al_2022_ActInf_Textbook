@@ -1,78 +1,45 @@
-# TODO — Parr et al. 2022 Active Inference Textbook
+# Documentation TODO — Parr et al. 2022 Active Inference Textbook
 
-- **Owner:** Active Inference Institute — Textbook Group
-- **Status:** Active
-- **Last reviewed:** 2026-08-01
+**Last reviewed:** 2026-08-02
 
-Project backlog for the Active Inference Textbook repository. Content repo: open-access
-PDF, cleaned plaintext extractions (chapters 1–10, appendices A–C, notes), and
-computational notes (`Chapters/VFE.jl` Pluto notebook, `Chapters/03_blanket.ipynb`).
+This backlog records the 2026-08-02 documentation-deep review. Minor means a
+small correction such as a typo, broken link, or formatting issue. Medium means
+a stale section rewrite, documentation restructure, or missing practical guide.
+Major means a large documentation-system overhaul, new documentation site, or
+cross-cutting refactor.
 
-## Completed / Closed
+## Minor
 
-Items genuinely done in source/docs/metadata/tests (including all Minor, Medium, and
-Major findings from the 2026-08-01 review-and-implementation pass).
+- [x] **M1 — README inventory and command corrections.** Update the repository
+  tree and plaintext-cleaning command to match the checked-in files. Path:
+  `README.md`. **Completed in `ee81c0d`.**
+- [x] **M2 — Remove stale cleaner option.** Remove the documented but unsupported
+  `--verify-only` option. Path: `scripts/clean_plaintext.py`. **Completed in
+  `ee81c0d`.**
+- [x] **M3 — Clean Chapter 3 notebook prose and link.** Remove draft residue and
+  redundant text, correct grammar, and replace the stale pgmpy URL. Path:
+  `Chapters/03_blanket.ipynb`. **Completed in `ee81c0d`.**
 
-### Major
+## Medium
 
-- [x] **M1 — `VFE.jl` variational free energy equation corrected.** The `vfe(q)`
-      function now computes the mathematically correct form
-      `F(q) = q·log(q/p1) + (1−q)·log((1−q)/p2) − log P(y)` (with an `xlogy` helper for
-      the 0·log(0) = 0 boundary), replaces the previous incorrect
-      `x * (log(x − log(p1)) + (1−x)(log(1−x) − log(p2)))`, and fixes the posterior
-      computation (elementwise joint over a length-2 vector, correct marginal and
-      exact posterior). The plot cell marks the exact posterior with a dashed `vline`.
-      Added **`Chapters/test_vfe.jl`** — 80/80 tests pass
-      (`julia Chapters/test_vfe.jl`), asserting the posterior normalizes, the argmin of
-      F equals the exact posterior, inference lowers F, and F is finite on the interior.
-      `VFE.jl` parses as valid Julia.
-- [x] **M2 — PlainText extractions cleaned.** Added **`scripts/clean_plaintext.py`**,
-      a deterministic, content-preserving pipeline that removes MIT-Press download
-      footers (216 lines) and isolated page-number lines (213 lines) and wraps long
-      prose lines, while preserving standalone equation/header lines (234 equation
-      lines intact). All 14 files regenerated in place; integrity invariant (total
-      non-whitespace characters preserved exactly, modulo removed lines) passes for all
-      14 files. Zero footers and zero page numbers remain.
-- [x] **M3 — `03_blanket.ipynb` completed.** The Chapter 3 straw-man scaffold was
-      replaced with substantive, accurate study notes and three working, dependency-free
-      (standard-library-only) Python code cells: a Markov-blanket calculator for a
-      Bayesian network (parents + children + co-parents), a numeric surprise
-      (−ln P(y)) demo, and a variational-free-energy minimisation demo whose minimiser
-      matches the exact posterior. Kernelspec standardized to `python3`. All three code
-      cells execute successfully.
+- [ ] **M4 — Add contributor guidance.** Document the repository's scope,
+  verification commands, generated-text workflow, and licensing. Path:
+  `CONTRIBUTING.md`. **Status: open.**
+- [ ] **M5 — Add citation metadata.** Add a `CITATION.cff` grounded in the
+  textbook citation and verified DOI. Path: `CITATION.cff`. **Status: open.**
+- [ ] **M6 — Make the review backlog auditable.** Replace the previous review
+  summary with dated Minor / Medium / Major sections and an explicit
+  open/deferred list. Path: `TODO.md`. **Status: in progress.**
+- [ ] **M7 — Record the review evidence.** Add a dated log of scope, findings,
+  and real verification results. Path: `REVIEW_LOG_2026-08-02.md`. **Status: open.**
 
-### Minor / Medium (prior pass + this pass)
+## Major
 
-- [x] **Medium — Stub README rewritten.** `README.md` now documents provenance,
-      citation, license, repository layout, notebook run instructions, the cleaning
-      pipeline, and the VFE regression test.
-- [x] **Minor — Remove committed Jupyter checkpoint cruft.** Deleted and untracked
-      `Chapters/.ipynb_checkpoints/03_blanket-checkpoint.ipynb`; added `.gitignore`
-      for `.ipynb_checkpoints/` and Python cache files.
-- [x] **Minor — Grammar typo in Chapter 3 notebook.** Fixed "Markov blanket is the
-      neighboring nodes of the given node." → "A Markov blanket is the set of
-      neighboring nodes of the given node."
-- [x] **Minor — Complete `.aii` sidecar artifact inventory.** Added `LICENSE`, the
-      textbook PDF, `TextbookContent/PlainText/`, `Chapters/VFE.jl`, and
-      `Chapters/03_blanket.ipynb` to `.aii/config.yaml`; bumped `meta.updated` to
-      2026-08-01.
-- [x] **Repo metadata baseline.** CC-BY-4.0 `LICENSE` and InstituteOS `.aii` sidecar
-      added (commit d5ebfb2).
+- [ ] **J1 — Documentation site overhaul.** Deferred: this repository has no
+  `docs/` site and is a small source-and-study-materials repository; a new site
+  would add maintenance without a verified need.
 
-## Major — Scoped (deferred)
+## Open / deferred
 
-None outstanding. All previously scoped Major findings (M1–M3) were implemented and
-verified in the 2026-08-01 pass.
-
-## Review notes (2026-08-01)
-
-- `git pull --ff-only`: already up to date; branch `main` clean, no conflicts.
-- Verification (real results, no fabrication):
-  - `julia Chapters/test_vfe.jl` → **80/80 tests pass** (0.2 s).
-  - `scripts/clean_plaintext.py` → integrity invariant holds for **all 14 files**;
-    216 footers + 213 page numbers removed; 0 footers / 0 page numbers remain.
-  - `Chapters/03_blanket.ipynb` → valid JSON, `python3` kernelspec; all 3 code cells
-    execute with correct output.
-  - `Chapters/VFE.jl` → parses as valid Julia; no dangling identifiers.
-  - `.aii/config.yaml` → valid YAML (Ruby psych), 6 artifacts.
-- Changes committed to `main` and pushed from this session.
+- J1 remains deferred for the reason above. No other findings are intentionally
+  left open after this pass.
