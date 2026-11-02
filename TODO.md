@@ -1,6 +1,6 @@
 # Documentation TODO — Parr et al. 2022 Active Inference Textbook
 
-**Last reviewed:** 2026-08-02
+**Last reviewed:** 2026-11-01
 
 This backlog records the 2026-08-02 documentation-deep review. Minor means a
 small correction such as a typo, broken link, or formatting issue. Medium means
@@ -34,6 +34,14 @@ cross-cutting refactor.
 - [x] **M7 — Record the review evidence.** Add a dated log of scope, findings,
   and real verification results. Path: `REVIEW_LOG_2026-08-02.md`.
   **Completed in `8ed6500`.**
+- [x] **M8 — Signpost the Institute's model-specification material and run the
+  gates in CI.** Add a related-resources section to the README with the GNN
+  syntax reference and the course and category-theory lessons for the model
+  class the simulator demonstrates, run the plaintext integrity check and the
+  Julia regression suite on every push and pull request, complete the sidecar
+  artifact inventory, and record the pass. Paths: `README.md`,
+  `.github/workflows/ci.yml`, `.aii/config.yaml`, `REVIEW_LOG_2026-11-01.md`.
+  **Completed in this change.**
 
 ## Major
 
@@ -43,5 +51,9 @@ cross-cutting refactor.
 
 ## Open / deferred
 
-- J1 remains deferred for the reason above. No other findings are intentionally
-  left open after this pass.
+- J1 remains deferred for the reason above.
+- `Chapters/VFE.jl` is deliberately **not** converted to a GNN document: it is
+  an interactive Pluto.jl notebook and a specification would remove the
+  interactivity the reading group uses. See `REVIEW_LOG_2026-11-01.md`. Do not
+  convert it without a request that asks for exactly that.
+- No other findings are intentionally left open after this pass.

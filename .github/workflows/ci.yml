@@ -1,0 +1,58 @@
+name: ci
+
+# The repository's two documented gates, both secret-free and service-free:
+#   plaintext — scripts/clean_plaintext.py in report-only mode. It checks the
+#               integrity invariant (non-whitespace characters other than those
+#               belonging to removed footer/page-number lines are preserved)
+#               across every tracked TextbookContent/PlainText/*.txt file and
+#               writes nothing.
+#   vfe       — Chapters/test_vfe.jl, the regression suite for the VFE
+#               simulator's mathematics: the exact posterior is normalized, the
+#               variational free energy is minimized there, inference lowers it
+#               below the prior's value, and it stays finite on the interior.
+#
+# Not covered: Chapters/VFE.jl is an interactive Pluto.jl notebook with no
+# headless entry point, so CI does not execute it; Chapters/test_vfe.jl
+# re-implements the same model deterministically and covers its mathematics.
+# Regenerating the plaintext from the PDF stays a reviewed, manual step.
+#
+# The cleaner is standard-library only, so the Python job tracks the current
+# stable interpreter instead of pinning a minor version. The Julia suite uses
+# only the standard library `Test`, so one stable leg is enough.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plaintext:
+    name: plaintext integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.x'
+      - name: Check the plaintext integrity invariant
+        run: python3 scripts/clean_plaintext.py
+
+  vfe:
+    name: VFE regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: julia-actions/setup-julia@da908477b5db94c10ffce8cfea9f2b3b9d5db687 # v3.0.3
+        with:
+          version: '1'
+      - name: Run the VFE simulator regression tests
+        run: julia Chapters/test_vfe.jl

@@ -29,8 +29,12 @@ Chapters/
 scripts/
   clean_plaintext.py                 — reproducible PlainText cleaning pipeline
 .aii/config.yaml                     — InstituteOS sidecar metadata manifest
+.github/workflows/ci.yml             — CI: plaintext integrity check + VFE regression tests
+CONTRIBUTING.md                      — contribution scope and verification commands
+CITATION.cff                         — machine-readable citation metadata
 LICENSE                              — CC-BY-4.0
 TODO.md                              — project backlog and review log
+REVIEW_LOG_<date>.md                 — dated documentation review logs (2026-08-02, 2026-11-01)
 ```
 
 The plaintext chapters are cleaned with `scripts/clean_plaintext.py` (MIT-Press
@@ -48,6 +52,39 @@ extraction, re-extract from the PDF and run `python3 scripts/clean_plaintext.py 
   energy is minimised at the exact posterior across the slider range).
 - `Chapters/03_blanket.ipynb` is a standard Jupyter notebook (Python 3 kernel), using
   only the standard library. Open with `jupyter notebook Chapters/03_blanket.ipynb`.
+
+Both documented gates run in CI (`.github/workflows/ci.yml`):
+`python3 scripts/clean_plaintext.py` for the plaintext integrity invariant and
+`julia Chapters/test_vfe.jl` for the simulator's mathematics. The Pluto notebook
+itself is interactive and is not executed in CI.
+
+## Related resources
+
+The VFE simulator implements a static-perception model: one binary hidden state,
+one binary observation, a likelihood, and a posterior over the hidden state. The
+Institute writes models of that class down in
+[Generalized Notation Notation](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation)
+(GNN), its plain-text specification format for generative models. This
+repository teaches the model rather than specifying it, so nothing here is
+declared in GNN today; these are the places to look when a model in this
+repository, or in the book behind it, needs a written specification.
+
+- [GNN syntax reference](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/main/docs/gnn/gnn_syntax.md)
+  — the format specification. That link follows the repository's `main` branch;
+  this repository pins no GNN revision.
+- [GNN Syntax Track](https://github.com/ActiveInferenceInstitute/courses/tree/main/course_development/gnn/01_gnn_syntax)
+  — its `models/static_perception.md` is the closest worked example to
+  `Chapters/VFE.jl`: one hidden state, one observation, the same likelihood.
+- [Map the model](https://github.com/ActiveInferenceInstitute/ActiveInferenceCategoryTheory/tree/main/gnn)
+  — the category-theory lesson that reads such a model as a morphism;
+  `learner_perception_model.md` is its perception example.
+- [Active Inference Ontology](https://github.com/ActiveInferenceInstitute/Active_Inference_Ontology)
+  — the controlled term set the GNN documents annotate.
+
+The plaintext editions of *Active Inference: The Free Energy Principle in Mind,
+Brain, and Behavior* remain the source of record for the mathematics in this
+repository. A GNN document expresses a model in text; it does not replace the
+book's derivations.
 
 ## Provenance and citation
 
