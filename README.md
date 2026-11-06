@@ -69,8 +69,9 @@ extraction, re-extract from the PDF and run `python3 scripts/clean_plaintext.py 
 
 Both documented gates run in CI (`.github/workflows/ci.yml`):
 `python3 scripts/clean_plaintext.py` for the plaintext integrity invariant and
-`julia Chapters/test_vfe.jl` for the simulator's mathematics. The Pluto notebook
-itself is interactive and is not executed in CI.
+`julia Chapters/test_vfe.jl` for the simulator's mathematics. The workflow also
+runs the pinned GNN conformance baseline (see `.github/GNN.md`). The Pluto
+notebook itself is interactive and is not executed in CI.
 
 ## Related resources
 
