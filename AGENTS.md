@@ -16,7 +16,7 @@ The default invocation is report-only and checks the non-whitespace integrity in
 
 - `Chapters/` holds the reading group's computational notes: `VFE.jl` (Pluto.jl), `test_vfe.jl` (Julia regression suite), and `03_blanket.ipynb` (Jupyter, Python standard library). The README documents how to open and run each.
 - `scripts/clean_plaintext.py` is the only repository script. `CONTRIBUTING.md` documents its modes.
-- `.aii/config.yaml` is the InstituteOS sidecar; `.github/workflows/ci.yml` runs the plaintext integrity check and the VFE regression suite on pushes to `main` and pull requests targeting `main`.
+- `.aii/config.yaml` is the InstituteOS sidecar; `.github/workflows/ci.yml` runs the plaintext integrity check, the VFE regression suite, and the pinned GNN conformance baseline (see `.github/GNN.md`) on pushes to `main` and pull requests targeting `main`.
 
 ## Verification
 
