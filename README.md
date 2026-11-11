@@ -84,8 +84,9 @@ declared in GNN today; these are the places to look when a model in this
 repository, or in the book behind it, needs a written specification.
 
 - [GNN syntax reference](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/main/docs/gnn/gnn_syntax.md)
-  — the format specification. That link follows the repository's `main` branch;
-  this repository pins no GNN revision.
+  — the format specification. That link follows the repository's `main` branch
+  rather than a pinned revision; the separate CI conformance job pins its own
+  GNN revision in [`.github/gnn-pin.json`](.github/gnn-pin.json).
 - [GNN Syntax Track](https://github.com/ActiveInferenceInstitute/courses/tree/main/course_development/gnn/01_gnn_syntax)
   — its `models/static_perception.md` is the closest worked example to
   `Chapters/VFE.jl`: one hidden state, one observation, the same likelihood.
