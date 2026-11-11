@@ -1,0 +1,11 @@
+{
+  "schema": "aii-readiness/v1",
+  "repo": "ActiveInferenceInstitute/Parr_et_al_2022_ActInf_Textbook",
+  "tier": "python-library",
+  "standard_version": "1.0.0",
+  "baseline": {
+    "commit": "d41ec432b0b5a8135d3b61fbb0a84523de87fb97",
+    "measured_at": "2026-11-10"
+  },
+  "waivers": []
+}

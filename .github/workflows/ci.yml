@@ -36,6 +36,7 @@ concurrency:
 
 jobs:
   plaintext:
+    timeout-minutes: 60
     name: plaintext integrity
     runs-on: ubuntu-latest
     steps:
@@ -47,6 +48,7 @@ jobs:
         run: python3 scripts/clean_plaintext.py
 
   vfe:
+    timeout-minutes: 60
     name: VFE regression tests
     runs-on: ubuntu-latest
     steps:

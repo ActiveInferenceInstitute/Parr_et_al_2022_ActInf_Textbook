@@ -1,11 +1,13 @@
-# AII sidecar — InstituteOS metadata. Schema: instituteos.platform.aii_sidecar
+# AII sidecar — InstituteOS metadata. Schema: aii_platform.aii_sidecar
 meta:
-  updated: '2026-11-01'
+  sidecar_version: 1.2.1
+  updated: '2026-11-10'
 repo:
   name: Parr_et_al_2022_ActInf_Textbook
   slug: parr-et-al-2022-actinf-textbook
   full_name: ActiveInferenceInstitute/Parr_et_al_2022_ActInf_Textbook
-  description: Active Inference Textbook Group
+  description: 'Parr, T., Pezzulo, G., & Friston, K. J. (2022). Active Inference:
+    The Free Energy Principle in Mind, Brain, and Behavior. MIT Press. ISBN 978-0-262-36997-8.'
 institute:
   category: education
   maturity: released
@@ -59,12 +61,19 @@ artifacts:
 - path: TODO.md
   kind: doc
   description: Dated documentation backlog with open and deferred items.
-- path: REVIEW_LOG_*.md
+- path: AGENTS.md
   kind: doc
-  description: Dated documentation review logs (scope, findings, verification).
+  description: Agent guidance.
+- path: REVIEW_LOG_2026-08-02.md
+  kind: doc
+  description: Repository artifact.
+- path: REVIEW_LOG_2026-11-01.md
+  kind: doc
+  description: Repository artifact.
 provenance:
   license: CC-BY-4.0
   citation:
+    doi: 10.7551/mitpress/12441.001.0001>.
     text: Active Inference Institute — Parr_et_al_2022_ActInf_Textbook.
 instituteos:
   tags:
@@ -72,11 +81,19 @@ instituteos:
   - '2022'
   - actinf
   - textbook
-  - inference
   - julia
 capabilities:
 - notebooks
+- ci
+- citation
 tasks:
   inventory:
     cmd: git ls-files
     description: List tracked files.
+docs:
+- README.md
+- AGENTS.md
+- docs/INTEGRATION.md
+- docs/README.md
+- docs/AGENTS.md
+schema: aii-sidecar/v1
