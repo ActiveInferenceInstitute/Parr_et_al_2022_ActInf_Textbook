@@ -1,7 +1,7 @@
 # AII sidecar — InstituteOS metadata. Schema: aii_platform.aii_sidecar
 meta:
   sidecar_version: 1.2.1
-  updated: '2026-11-10'
+  updated: '2026-11-11'
 repo:
   name: Parr_et_al_2022_ActInf_Textbook
   slug: parr-et-al-2022-actinf-textbook
@@ -52,6 +52,10 @@ artifacts:
 - path: scripts/clean_plaintext.py
   kind: tool
   description: Deterministic PlainText cleaning pipeline (footers/page numbers).
+- path: .github/workflows/ci.yml
+  kind: code
+  description: CI workflow for the plaintext integrity check, the VFE regression
+    suite, and the pinned GNN conformance baseline.
 - path: CONTRIBUTING.md
   kind: doc
   description: Contribution scope, conventions, and verification commands.
@@ -73,7 +77,7 @@ artifacts:
 provenance:
   license: CC-BY-4.0
   citation:
-    doi: 10.7551/mitpress/12441.001.0001>.
+    doi: 10.7551/mitpress/12441.001.0001
     text: Active Inference Institute — Parr_et_al_2022_ActInf_Textbook.
 instituteos:
   tags:

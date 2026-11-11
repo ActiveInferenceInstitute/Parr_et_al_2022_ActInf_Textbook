@@ -29,7 +29,8 @@ Chapters/
 scripts/
   clean_plaintext.py                 — reproducible PlainText cleaning pipeline
 .aii/config.yaml                     — InstituteOS sidecar metadata manifest
-.github/workflows/ci.yml             — CI: plaintext integrity check + VFE regression tests
+.github/workflows/ci.yml             — CI: plaintext integrity check, VFE regression tests,
+                                       pinned GNN conformance baseline
 CONTRIBUTING.md                      — contribution scope and verification commands
 CITATION.cff                         — machine-readable citation metadata
 LICENSE                              — CC-BY-4.0
