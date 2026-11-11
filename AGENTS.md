@@ -10,7 +10,20 @@ The repository is study material for the open-access textbook. Start with [READM
 python3 scripts/clean_plaintext.py --apply
 ```
 
-The default invocation is report-only and checks the non-whitespace integrity invariant. Do not add a README or AGENTS file under `TextbookContent/`; that tree is the build output and the cleaner globs `PlainText/*.txt`. Use this file instead.
+The default invocation is report-only and checks the non-whitespace integrity invariant. Do not add a README or AGENTS file under `TextbookContent/`; that tree is the build output and the cleaner globs `PlainText/*.txt`. The tree is documented instead in [`docs/plaintext-content.md`](docs/plaintext-content.md).
+
+## Where the documentation lives
+
+- [`docs/README.md`](docs/README.md) is the documentation index; topic files are
+  [`docs/plaintext-content.md`](docs/plaintext-content.md),
+  [`docs/chapters.md`](docs/chapters.md), and
+  [`docs/validation.md`](docs/validation.md).
+- [`Chapters/README.md`](Chapters/README.md) is the folder guide for the
+  computational notes.
+- The root [`README.md`](README.md) holds the inventory, run commands, and
+  provenance; [`CONTRIBUTING.md`](CONTRIBUTING.md) holds scope and licensing.
+- This repository deliberately has no documentation site; `docs/` is plain
+  Markdown (see [`TODO.md`](TODO.md) J1). Keep relative links valid.
 
 ## Authored content
 

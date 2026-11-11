@@ -47,6 +47,7 @@
 | `Chapters/test_vfe.jl` | `test` | Julia regression tests for the VFE simulator. |
 | `Chapters/03_blanket.ipynb` | `notebook` | Chapter 3 (Markov blankets) Jupyter notes. |
 | `scripts/clean_plaintext.py` | `tool` | Deterministic PlainText cleaning pipeline (footers/page numbers). |
+| `docs` | `doc` | Documentation index and topic guides (plaintext content, chapters, validation). |
 | `.github/workflows/ci.yml` | `code` | CI workflow for the plaintext integrity check, the VFE regression suite, and the pinned GNN conformance baseline. |
 | `CONTRIBUTING.md` | `doc` | Contribution scope, conventions, and verification commands. |
 | `CITATION.cff` | `doc` | Machine-readable citation metadata for the textbook and this repository. |

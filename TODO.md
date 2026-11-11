@@ -45,9 +45,10 @@ cross-cutting refactor.
 
 ## Major
 
-- [ ] **J1 — Documentation site overhaul.** Deferred: this repository has no
-  `docs/` site and is a small source-and-study-materials repository; a new site
-  would add maintenance without a verified need.
+- [ ] **J1 — Documentation site overhaul.** Deferred: a pass-3 documentation
+  tree now exists in `docs/` (index, plaintext, chapters, validation), but it is
+  plain Markdown. A hosted documentation site would still add maintenance
+  without a verified need.
 
 ## Open / deferred
 

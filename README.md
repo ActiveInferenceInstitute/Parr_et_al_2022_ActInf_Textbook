@@ -14,6 +14,17 @@ collects the original open-access PDF, machine-readable plaintext extractions of
 chapters and appendices, and computational notes (Julia / Jupyter) produced by the
 reading group.
 
+## Documentation
+
+- [`docs/README.md`](docs/README.md) — index of the repository documentation.
+  - [`docs/plaintext-content.md`](docs/plaintext-content.md) — the generated plaintext tree and its integrity invariant.
+  - [`docs/chapters.md`](docs/chapters.md) — the computational notes and how to run them.
+  - [`docs/validation.md`](docs/validation.md) — the offline gates and what CI runs.
+- [`AGENTS.md`](AGENTS.md) — guidance for automated agents.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution scope and verification commands.
+- [`TODO.md`](TODO.md) — dated documentation backlog and review log.
+- [`CITATION.cff`](CITATION.cff) — machine-readable citation metadata.
+
 ## Repository layout
 
 ```
@@ -23,9 +34,11 @@ TextbookContent/PlainText/          — cleaned plaintext of the textbook:
   Appendix_A/B/C-ActInf22.txt        … appendices A–C
   Notes-ActInf22.txt                 … the book's endnotes
 Chapters/
+  README.md                          — folder guide for the computational notes
   VFE.jl                             — Pluto.jl notebook: Variational Free Energy Simulator
   test_vfe.jl                        — Julia regression tests for the VFE simulator
   03_blanket.ipynb                   — Chapter 3 (The High Road) Jupyter notes
+docs/                                — repository documentation (index in docs/README.md)
 scripts/
   clean_plaintext.py                 — reproducible PlainText cleaning pipeline
 .aii/config.yaml                     — InstituteOS sidecar metadata manifest
@@ -103,6 +116,7 @@ book's derivations.
 ## The InstituteOS sidecar
 
 `.aii/config.yaml` is the Active Inference Institute (InstituteOS) metadata manifest
-for this repository (schema `instituteos.platform.aii_sidecar`). It records the
-federated relationships, artifact inventory, and provenance for the Institute's
-catalog.
+for this repository (schema `aii_platform.aii_sidecar`, marker `aii-sidecar/v1`). It
+records the federated relationships, artifact inventory, and provenance for the
+Institute's catalog. The rendered companion is
+[`.aii/docs/INTEGRATION.md`](.aii/docs/INTEGRATION.md).

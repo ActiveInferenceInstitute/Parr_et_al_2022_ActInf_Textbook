@@ -9,7 +9,9 @@ repo:
   description: 'Parr, T., Pezzulo, G., & Friston, K. J. (2022). Active Inference:
     The Free Energy Principle in Mind, Brain, and Behavior. MIT Press. ISBN 978-0-262-36997-8.'
 institute:
+  affiliation: institute
   category: education
+  status: active
   maturity: released
   steward: Active Inference Institute
 ecosystem:
@@ -52,6 +54,9 @@ artifacts:
 - path: scripts/clean_plaintext.py
   kind: tool
   description: Deterministic PlainText cleaning pipeline (footers/page numbers).
+- path: docs
+  kind: doc
+  description: Documentation index and topic guides (plaintext content, chapters, validation).
 - path: .github/workflows/ci.yml
   kind: code
   description: CI workflow for the plaintext integrity check, the VFE regression
