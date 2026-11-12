@@ -36,20 +36,23 @@ hosted run was observed.
 The before numbers are one run of the old commands on the same host, timed with
 `/usr/bin/time -p`:
 
-| Gate | Before | After (arm, same host, one run) |
+| Gate | Before (one run of the old command) | After (arm) |
 | --- | --- | --- |
-| plaintext integrity | `python3 scripts/clean_plaintext.py`, 0.11 s | `./run.sh plaintext`, 0.32 s |
-| VFE regression | `julia Chapters/test_vfe.jl`, 4.05 s | `./run.sh vfe`, 5.04 s |
-| GNN conformance | inline heredocs in the workflow, never runnable locally | `./run.sh gnn`, 15.56 s |
-| lint | none | `./run.sh lint`, 0.12 s |
-| docs | none (no link or index gate) | `./run.sh docs`, 0.15 s |
-| composite | (the five commands above) | `./run.sh fast` 0.74 s, `./run.sh full` 39.51 s |
+| plaintext integrity | `python3 scripts/clean_plaintext.py`, 0.11 s | `./run.sh plaintext` |
+| VFE regression | `julia Chapters/test_vfe.jl`, 4.05 s | `./run.sh vfe` |
+| GNN conformance | two inline `python3 -` heredocs in the workflow, not runnable locally | `./run.sh gnn` |
+| lint | none | `./run.sh lint` |
+| docs | none (no link or index gate) | `./run.sh docs` |
+| composite | the five commands above | `./run.sh fast`, `./run.sh full` |
 
-`plaintext` and `vfe` run the same commands as before; the differences above
-are run-to-run variance on this host, not improvements. The speed gain is in the
-default and composite arms: `./run.sh fast` covers lint, links and plaintext in
-under a second, and `full` runs everything in about 40 s, dominated by the
-pinned parser install (about 15 s).
+The after values live only in
+[`docs/_generated/GATES.md`](docs/_generated/GATES.md), written by
+`./run.sh report` over the committed file set; they are not copied here.
+`plaintext` and `vfe` run the same commands as before, so their measured
+difference is run-to-run variance on this host, not an improvement.
+`./run.sh fast` covers lint, links and plaintext in under a second; `full`
+re-runs every arm, so it costs their sum plus process overhead, and the
+pinned-parser install dominates that sum.
 
 The GNN arm needs network access. The pinned package declares
 `requires-python = ">=3.11,<3.15"` in its own `pyproject.toml`; this host's
