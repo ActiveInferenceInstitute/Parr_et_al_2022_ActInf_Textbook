@@ -23,7 +23,7 @@ every long-lived document, kept current by the `docs` gate.
 
 ```bash
 ./run.sh --list   # every arm and its exact command
-./run.sh fast     # lint + plaintext + docs
+./run.sh fast     # lint + tests + plaintext + docs
 ./run.sh full     # every arm
 ```
 

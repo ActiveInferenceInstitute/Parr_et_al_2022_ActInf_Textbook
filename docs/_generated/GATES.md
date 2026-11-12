@@ -2,17 +2,18 @@
 
 # Gate measurements
 
-Generated 2026-11-12 13:04 UTC on `macOS-27.0.1-arm64-arm-64bit-Mach-O` with Python 3.15.2. One timed run per arm, wall clock, no warm-up: a local observation on the host that produced this file, not a performance claim and not a substitute for a green run.
+Generated 2026-11-12 20:30 UTC on `macOS-27.0.1-arm64-arm-64bit-Mach-O` with Python 3.15.2. One timed run per arm, wall clock, no warm-up: a local observation on the host that produced this file, not a performance claim and not a substitute for a green run.
 
 | Arm | Exact command | Wall time (s) | Result |
 | --- | --- | --- | --- |
-| `lint` | `python3 scripts/lint_sources.py` | 0.32 | pass |
-| `plaintext` | `python3 scripts/clean_plaintext.py` | 0.14 | pass |
-| `docs` | `python3 scripts/check_docs.py` | 0.24 | pass |
-| `vfe` | `julia Chapters/test_vfe.jl` | 6.47 | pass |
-| `gnn` | `python3 scripts/check_gnn_conformance.py` | 13.57 | pass |
-| `fast` | `./run.sh lint && ./run.sh plaintext && ./run.sh docs` | 0.62 | pass |
-| `full` | `./run.sh lint && ./run.sh plaintext && ./run.sh docs && ./run.sh vfe && ./run.sh gnn` | 20.95 | pass |
+| `lint` | `python3 scripts/lint_sources.py` | 0.08 | pass |
+| `tests` | `python3 -m unittest scripts.test_check_gnn_conformance` | 0.10 | pass |
+| `plaintext` | `python3 scripts/clean_plaintext.py` | 0.09 | pass |
+| `docs` | `python3 scripts/check_docs.py` | 0.07 | pass |
+| `vfe` | `julia Chapters/test_vfe.jl` | 0.71 | pass |
+| `gnn` | `python3 scripts/check_gnn_conformance.py` | 2.67 | pass |
+| `fast` | `./run.sh lint && ./run.sh tests && ./run.sh plaintext && ./run.sh docs` | 0.40 | pass |
+| `full` | `./run.sh lint && ./run.sh tests && ./run.sh plaintext && ./run.sh docs && ./run.sh vfe && ./run.sh gnn` | 3.60 | pass |
 
 ## Facts
 

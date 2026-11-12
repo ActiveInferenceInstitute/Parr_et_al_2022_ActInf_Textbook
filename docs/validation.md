@@ -7,7 +7,7 @@ job execute the same command line.
 
 ```bash
 ./run.sh --list   # every arm and its exact command
-./run.sh fast     # lint + plaintext + docs (no Julia, no network)
+./run.sh fast     # lint + tests + plaintext + docs (no Julia, no network)
 ./run.sh full     # every arm
 ./run.sh report   # rewrite docs/_generated/GATES.md with measured wall times
 ```
@@ -16,9 +16,10 @@ job execute the same command line.
 
 | Arm | Exact command | What it proves | CI job key / display name |
 | --- | --- | --- | --- |
-| `lint` | `python3 scripts/lint_sources.py` | Every tracked Python file compiles; every tracked `.json`/`.ipynb` parses. | `plaintext` / `python arms (lint, docs, plaintext)` |
-| `plaintext` | `python3 scripts/clean_plaintext.py` | The non-whitespace integrity invariant holds across `TextbookContent/PlainText/*.txt`; nothing is written. | `plaintext` / `python arms (lint, docs, plaintext)` |
-| `docs` | `python3 scripts/check_docs.py` | Every relative link in tracked Markdown resolves; every page under `docs/` is reachable from [`documentation-index.md`](documentation-index.md), and the hub links that index. | `plaintext` / `python arms (lint, docs, plaintext)` |
+| `lint` | `python3 scripts/lint_sources.py` | Every tracked Python file compiles; every tracked `.json`/`.ipynb` parses. | `plaintext` / `python arms (lint, tests, docs, plaintext)` |
+| `tests` | `python3 -m unittest scripts.test_check_gnn_conformance` | The GNN conformance script's type check is fail-closed: a checker result other than `True` exits 1 for both repository and pinned-exemplar sources, and the receipt's `scope`/`result` label the source. The parser is replaced by fixed-result modules, so no network or pinned install is needed. | `plaintext` / `python arms (lint, tests, docs, plaintext)` |
+| `plaintext` | `python3 scripts/clean_plaintext.py` | The non-whitespace integrity invariant holds across `TextbookContent/PlainText/*.txt`; nothing is written. | `plaintext` / `python arms (lint, tests, docs, plaintext)` |
+| `docs` | `python3 scripts/check_docs.py` | Every relative link in tracked Markdown resolves; every page under `docs/` is reachable from [`documentation-index.md`](documentation-index.md), and the hub links that index. | `plaintext` / `python arms (lint, tests, docs, plaintext)` |
 | `vfe` | `julia Chapters/test_vfe.jl` | The VFE simulator's mathematics: normalized posterior, free energy minimised at the exact posterior, inference lowers it, finiteness on the interior. | `vfe` / `VFE regression tests` |
 | `gnn` | `python3 scripts/check_gnn_conformance.py` | The pinned GNN parser installs at the pin's revision, its version equals the pin's tag, and every repository `*.gnn.md` sketch — or the pinned upstream exemplar when there is none — parses and type-checks (the type checker must return exactly `True`); the receipt's `scope`/`result` distinguish repository content from the pinned-exemplar baseline. | `gnn-conformance` / `gnn conformance (pinned)` |
 
@@ -66,11 +67,20 @@ satisfying interpreter from `PATH` (`GNN_PIN_PYTHON` overrides the search). On a
 host whose default `python3` is newer than that range it says which interpreter
 it skipped and which one it used.
 
+## GNN unit tests
+
+[`../scripts/test_check_gnn_conformance.py`](../scripts/test_check_gnn_conformance.py)
+is the `tests` arm. It replaces the parser with fixed-result modules, so it needs
+neither network nor the pinned package: it asserts that a type-checker result
+other than `True` exits 1 for both the repository and the pinned-exemplar source,
+and that the receipt's `scope`/`result` label each source correctly. It is part
+of `./run.sh fast` and `./run.sh full`, and the `python arms` CI job runs it.
+
 ## What CI runs, and what it installs
 
-- `plaintext` job — `./run.sh lint`, `./run.sh docs`, `./run.sh plaintext`. The
-  arms are standard-library Python, so this job uses the runner's `python3` and
-  has no setup or install step.
+- `plaintext` job — `./run.sh lint`, `./run.sh tests`, `./run.sh docs`,
+  `./run.sh plaintext`. The arms are standard-library Python, so this job uses
+  the runner's `python3` and has no setup or install step.
 - `vfe` job — `./run.sh vfe`, with `julia-actions/setup-julia`.
 - `gnn-conformance` job — `./run.sh gnn`, with `actions/setup-python` pinned to
   `3.12`; the arm installs the pinned parser itself.

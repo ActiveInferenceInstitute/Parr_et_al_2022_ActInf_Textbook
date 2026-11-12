@@ -28,10 +28,10 @@ The default invocation is report-only and checks the non-whitespace integrity in
 ## Authored content
 
 - `Chapters/` holds the reading group's computational notes: `VFE.jl` (Pluto.jl), `test_vfe.jl` (Julia regression suite), and `03_blanket.ipynb` (Jupyter, Python standard library). The README documents how to open and run each.
-- `scripts/` also holds one script per gate arm (`lint_sources.py`, `check_docs.py`,
+- `scripts/` also holds one script per gate arm (`lint_sources.py`, `test_check_gnn_conformance.py`, `check_docs.py`,
 `check_gnn_conformance.py`, `gate_report.py`), dispatched by `./run.sh`.
 `CONTRIBUTING.md` documents the cleaner's modes.
-- `.aii/config.yaml` is the InstituteOS sidecar; `.github/workflows/ci.yml` calls the `./run.sh` arms — `lint`, `docs`, `plaintext`, `vfe` and the pinned `gnn` conformance check (see `.github/GNN.md`) — on pushes to `main` and pull requests targeting `main`.
+- `.aii/config.yaml` is the InstituteOS sidecar; `.github/workflows/ci.yml` calls the `./run.sh` arms — `lint`, `tests`, `docs`, `plaintext`, `vfe` and the pinned `gnn` conformance check (see `.github/GNN.md`) — on pushes to `main` and pull requests targeting `main`.
 
 ## Verification
 
@@ -39,7 +39,7 @@ Run the gates relevant to your change through the single entry point:
 
 ```bash
 ./run.sh --list   # every arm and its exact command
-./run.sh fast     # lint + plaintext + docs
+./run.sh fast     # lint + tests + plaintext + docs
 ./run.sh full     # every arm
 ```
 

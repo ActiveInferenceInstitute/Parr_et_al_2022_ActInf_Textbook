@@ -23,7 +23,7 @@ Run the checks relevant to your change:
 
 ```bash
 ./run.sh --list   # every arm and its exact command
-./run.sh fast     # lint + plaintext + docs
+./run.sh fast     # lint + tests + plaintext + docs
 ./run.sh full     # every arm (adds the Julia suite and the GNN pin)
 ```
 

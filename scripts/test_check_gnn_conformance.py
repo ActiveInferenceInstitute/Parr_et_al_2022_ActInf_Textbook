@@ -2,7 +2,9 @@
 """Unit tests for the pinned GNN arm's fail-closed type check and receipt labels.
 
 The real parser is replaced by fixed-result modules, so these tests need neither
-network nor the pinned package.  Run:  python3 -m unittest scripts.test_check_gnn_conformance
+network nor the pinned package.  This is the `tests` arm of ./run.sh.
+
+Run:  ./run.sh tests   (or: python3 -m unittest scripts.test_check_gnn_conformance)
 """
 
 from __future__ import annotations
