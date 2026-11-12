@@ -92,6 +92,50 @@ mathematics, `gnn` checks the pinned GNN conformance baseline
 [`docs/_generated/GATES.md`](docs/_generated/GATES.md). The Pluto notebook
 itself is interactive and is not executed in CI.
 
+## Education contract
+
+[`education-contract.json`](education-contract.json) declares adoption of the
+[Education workflow contract](https://github.com/ActiveInferenceInstitute/courses/blob/main/docs/workflows/education.md)
+owned by `courses`. [`specs/education/schema.json`](specs/education/schema.json)
+is a byte-identical copy of that lead's schema;
+[`specs/education/parr-2022.json`](specs/education/parr-2022.json) is an authored
+transcription, not a new curriculum.
+
+The bundle includes each numbered plaintext chapter and each computational
+notebook. Appendices, endnotes, front matter, and the Julia regression script
+are not separate chapter/notebook units. Titles retain the source wording
+(without chapter-number prefixes). Objectives quote the chapters' stated aims,
+joining extraction line breaks with spaces rather than inventing learner outcomes.
+The bundle's provenance revision identifies the source material transcribed.
+
+- Chapter objectives come from their introductions.
+- The blanket notebook uses the aim in the introduction to
+  [the high-road chapter](TextbookContent/PlainText/3-ActInf22.txt):
+  “The chapter discloses the formal equivalence…” through
+  “…Bayesian perspectives on adaptive systems.”
+- The VFE notebook uses the aim in “From Bayesian Inference to Free Energy” in
+  [the generative-models chapter](TextbookContent/PlainText/4-ActInf22.txt):
+  “In this section, we recap…” through “…drawing inferences about the world.”
+- Consecutive chapter edges follow “Structure of the Book” in
+  [the overview](TextbookContent/PlainText/1-ActInf22.txt); each rationale quotes
+  its next-chapter description. These are **soft**, advisory reading-order edges,
+  not mandatory prerequisites: the book explicitly permits skipping its formal
+  generative-models chapter. No notebook ordering or hard dependency is invented.
+- The glossary is empty; this migration does not author a new term corpus.
+
+With the lead checkout beside this repository, run its checker directly (no
+lead environment synchronization or timing-file writes):
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 ../courses/software/scripts/check_education_contract.py specs/education/parr-2022.json
+PYTHONDONTWRITEBYTECODE=1 python3 ../courses/software/scripts/check_education_contract.py
+./run.sh docs vfe
+```
+
+The first command validates this bundle; the second checks schema-copy integrity
+and adoption across the registry. Other members' pending or diverged states are
+not repaired here. The member's existing gate arms remain unchanged.
+
 ## Related resources
 
 The VFE simulator implements a static-perception model: one binary hidden state,
