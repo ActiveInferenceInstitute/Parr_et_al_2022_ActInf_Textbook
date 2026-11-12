@@ -1,6 +1,6 @@
 # Documentation TODO — Parr et al. 2022 Active Inference Textbook
 
-**Last reviewed:** 2026-11-01
+**Last reviewed:** 2026-11-12
 
 This backlog records the 2026-08-02 documentation-deep review. Minor means a
 small correction such as a typo, broken link, or formatting issue. Medium means
@@ -34,6 +34,20 @@ cross-cutting refactor.
 - [x] **M7 — Record the review evidence.** Add a dated log of scope, findings,
   and real verification results. Path: `REVIEW_LOG_2026-08-02.md`.
   **Completed in `8ed6500`.**
+- [x] **M9 — Composable gate entry point with measured arms.** Replace the
+  duplicated CI command bodies with one `run.sh` whose arms CI calls unchanged;
+  extract the inline GNN conformance script into `scripts/check_gnn_conformance.py`
+  (the pin file is the only source of its values); add the `lint` and `docs`
+  arms; record per-arm wall time in a generated document. Paths: `run.sh`,
+  `scripts/lint_sources.py`, `scripts/check_docs.py`,
+  `scripts/check_gnn_conformance.py`, `scripts/gate_report.py`,
+  `.github/workflows/ci.yml`, `docs/validation.md`, `docs/_generated/GATES.md`.
+  **Completed in this change.**
+- [x] **M10 — Flat documentation index.** Add `docs/documentation-index.md`,
+  link it from the hub, and make the `docs` arm fail when a page is missing from
+  the index or a relative link does not resolve. Paths:
+  `docs/documentation-index.md`, `docs/README.md`, `scripts/check_docs.py`.
+  **Completed in this change.**
 - [x] **M8 — Signpost the Institute's model-specification material and run the
   gates in CI.** Add a related-resources section to the README with the GNN
   syntax reference and the course and category-theory lessons for the model
@@ -52,7 +66,11 @@ cross-cutting refactor.
 
 ## Open / deferred
 
-- J1 remains deferred for the reason above.
+- J1 remains deferred for the reason above: `docs/` is plain Markdown and
+  `./run.sh docs` checks its links and index coverage, but there is no hosted
+  site.
+- There is no `types` arm and no style linter: the repository ships nothing that
+  would consume either, so `./run.sh lint` stops at syntax and JSON validity.
 - `Chapters/VFE.jl` is deliberately **not** converted to a GNN document: it is
   an interactive Pluto.jl notebook and a specification would remove the
   interactivity the reading group uses. See `REVIEW_LOG_2026-11-01.md`. Do not

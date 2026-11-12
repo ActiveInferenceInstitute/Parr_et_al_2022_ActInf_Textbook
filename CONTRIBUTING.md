@@ -21,10 +21,14 @@ in behavior that can be verified from the repository.
 
 Run the checks relevant to your change:
 
-```text
-python3 scripts/clean_plaintext.py
-julia Chapters/test_vfe.jl
+```bash
+./run.sh --list   # every arm and its exact command
+./run.sh fast     # lint + plaintext + docs
+./run.sh full     # every arm (adds the Julia suite and the GNN pin)
 ```
+
+CI calls the same arms, so a green `./run.sh full` is the local equivalent of a
+green workflow. `docs/validation.md` explains each arm.
 
 The cleaner's default mode reports its integrity checks without writing files.
 Use `python3 scripts/clean_plaintext.py --apply` only when regenerating the
