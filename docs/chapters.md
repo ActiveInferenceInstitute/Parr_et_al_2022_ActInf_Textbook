@@ -18,7 +18,9 @@ interactively.
 observation, a likelihood, and a posterior over the hidden state. The notebook
 defines `F[Q, y] = D_KL[Q(x) || P(x|y)] - ln P(y)`. The Julia regression suite
 re-implements that model deterministically — no Pluto, no `@bind` — and asserts
-its mathematical properties; it currently runs 80 assertions in about 0.3 s.
+its mathematical properties. The assertion count and the arm's wall time are
+measured in [`_generated/GATES.md`](_generated/GATES.md); run it with
+`./run.sh vfe`.
 
 ## Notes for contributors
 

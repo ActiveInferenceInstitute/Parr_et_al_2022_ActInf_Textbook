@@ -16,10 +16,12 @@ reading group.
 
 ## Documentation
 
-- [`docs/README.md`](docs/README.md) — index of the repository documentation.
+- [`docs/README.md`](docs/README.md) — documentation hub and reading order.
+  - [`docs/documentation-index.md`](docs/documentation-index.md) — flat index of every long-lived document.
   - [`docs/plaintext-content.md`](docs/plaintext-content.md) — the generated plaintext tree and its integrity invariant.
   - [`docs/chapters.md`](docs/chapters.md) — the computational notes and how to run them.
-  - [`docs/validation.md`](docs/validation.md) — the offline gates and what CI runs.
+  - [`docs/validation.md`](docs/validation.md) — the `./run.sh` arms and the CI jobs that call them.
+  - [`docs/_generated/GATES.md`](docs/_generated/GATES.md) — generated per-arm wall time and gate facts.
 - [`AGENTS.md`](AGENTS.md) — guidance for automated agents.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution scope and verification commands.
 - [`TODO.md`](TODO.md) — dated documentation backlog and review log.
@@ -38,12 +40,18 @@ Chapters/
   VFE.jl                             — Pluto.jl notebook: Variational Free Energy Simulator
   test_vfe.jl                        — Julia regression tests for the VFE simulator
   03_blanket.ipynb                   — Chapter 3 (The High Road) Jupyter notes
-docs/                                — repository documentation (index in docs/README.md)
+docs/                                — repository documentation (hub: docs/README.md,
+                                       flat index: docs/documentation-index.md)
 scripts/
   clean_plaintext.py                 — reproducible PlainText cleaning pipeline
+  lint_sources.py                    — `./run.sh lint` arm: Python compiles, JSON parses
+  check_docs.py                      — `./run.sh docs` arm: relative links and docs index
+  check_gnn_conformance.py           — `./run.sh gnn` arm: pinned GNN parser conformance
+  gate_report.py                     — `./run.sh report` arm: writes docs/_generated/GATES.md
+run.sh                               — single gate entry point; CI calls its arms
 .aii/config.yaml                     — InstituteOS sidecar metadata manifest
-.github/workflows/ci.yml             — CI: plaintext integrity check, VFE regression tests,
-                                       pinned GNN conformance baseline
+.github/workflows/ci.yml             — CI: calls the ./run.sh arms (lint, docs, plaintext,
+                                       vfe, gnn)
 CONTRIBUTING.md                      — contribution scope and verification commands
 CITATION.cff                         — machine-readable citation metadata
 LICENSE                              — CC-BY-4.0
@@ -62,16 +70,27 @@ extraction, re-extract from the PDF and run `python3 scripts/clean_plaintext.py 
 - `Chapters/VFE.jl` is a [Pluto.jl](https://plutojl.org) notebook. Open it with
   `julia -e 'using Pluto; Pluto.run()'` and load the file. Dependencies are pinned
   in the notebook's embedded manifest (Julia 1.7.3).
-- Verify the simulator's math with `julia Chapters/test_vfe.jl` (asserts the free
-  energy is minimised at the exact posterior across the slider range).
+- Verify the simulator's math with `./run.sh vfe` (`julia Chapters/test_vfe.jl`,
+  which asserts the free energy is minimised at the exact posterior across the
+  slider range).
 - `Chapters/03_blanket.ipynb` is a standard Jupyter notebook (Python 3 kernel), using
   only the standard library. Open with `jupyter notebook Chapters/03_blanket.ipynb`.
 
-Both documented gates run in CI (`.github/workflows/ci.yml`):
-`python3 scripts/clean_plaintext.py` for the plaintext integrity invariant and
-`julia Chapters/test_vfe.jl` for the simulator's mathematics. The workflow also
-runs the pinned GNN conformance baseline (see `.github/GNN.md`). The Pluto
-notebook itself is interactive and is not executed in CI.
+Every gate is an arm of one entry point, `./run.sh`, and CI calls those same
+arms (`.github/workflows/ci.yml`):
+
+```bash
+./run.sh --list   # every arm and its exact command
+./run.sh fast     # lint + plaintext + docs
+./run.sh full     # every arm, including the Julia suite and the GNN pin
+```
+
+`plaintext` checks the integrity invariant, `vfe` runs the simulator's
+mathematics, `gnn` checks the pinned GNN conformance baseline
+(see `.github/GNN.md`). Arm details are in
+[`docs/validation.md`](docs/validation.md); measured wall times are in
+[`docs/_generated/GATES.md`](docs/_generated/GATES.md). The Pluto notebook
+itself is interactive and is not executed in CI.
 
 ## Related resources
 

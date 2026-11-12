@@ -15,7 +15,8 @@ not authored** — do not hand-edit them.
 | `Appendix_C-ActInf22.txt` | Appendix C |
 | `Notes-ActInf22.txt` | The book's endnotes |
 
-14 files in total.
+The table above is the complete list; [`_generated/GATES.md`](_generated/GATES.md)
+records the current count and per-arm wall time.
 
 ## How they are generated
 
@@ -38,7 +39,8 @@ with `--apply`.
 The cleaner preserves the total non-whitespace character count exactly, except
 for characters belonging to the footer/page-number lines it removes. Its report
 prints, for every file, the observed and expected counts and asserts they match;
-CI runs the report-only invocation as a gate (see [validation.md](validation.md)).
+`./run.sh plaintext` (and the CI job of the same arm) runs the report-only
+invocation as a gate (see [validation.md](validation.md)).
 
 ## Why there is no `README.md` inside `TextbookContent/`
 
