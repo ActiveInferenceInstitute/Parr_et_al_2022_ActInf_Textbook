@@ -1,0 +1,210 @@
+{
+  "schema": "education-contract/v1",
+  "provenance": {
+    "repository": "Parr_et_al_2022_ActInf_Textbook",
+    "revision": "1b0b86a63bdfbe6f8f56e9cf542746d4e1565fea"
+  },
+  "units": [
+    {
+      "unit_id": "parr-2022-chapter-01",
+      "title": "Overview",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "This chapter introduces the main question that Active Inference seeks to address: How do living organisms persist while engaging in adaptive exchanges with their environment?"
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/1-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-02",
+      "title": "The Low Road to Active Inference",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "It explains how Active Inference subsumes and extends these ideas by treating not just perception but also action, planning, and learning as problems of (Bayesian) inference and by deriving a principled (variational) approximation to such otherwise intractable problems."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/2-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-03",
+      "title": "The High Road to Active Inference",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "The chapter discloses the formal equivalence between the minimization of variational free energy and the maximization of model evidence (or self-evidencing) in approximate Bayesian inference, revealing a connection between free energy and Bayesian perspectives on adaptive systems."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/3-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-04",
+      "title": "The Generative Models of Active Inference",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "Specifically, it sets out the relationship between free energy and Bayesian inference, the form of the generative models typically used in Active Inference, and the dynamics obtained from minimizing free energy for these models."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/4-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-05",
+      "title": "Message Passing and Neurobiology",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "This chapter focuses on the way we can map the sparse message passing associated with variational inference to the sparse connectivity structure of biological computation."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/5-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-06",
+      "title": "A Recipe for Designing Active Inference Models",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "This chapter provides a four-step recipe to construct an Active Inference model, discussing the most important design choices one has to make to realize a model and providing some guidelines for those choices."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/6-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-07",
+      "title": "Active Inference in Discrete Time",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "Through a series of examples, building in complexity, we illustrate models of perceptual processing, decision-making, information seeking, learning, and hierarchical inference."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/7-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-08",
+      "title": "Active Inference in Continuous Time",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "We highlight the kinds of model used in motor control and the dynamical systems that play a role in such models, and we touch on the concept of generalized synchrony."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/8-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-09",
+      "title": "Model-Based Data Analysis",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "In this chapter, we focus on the ways in which Active Inference can be applied in understanding empirical data."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/9-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-chapter-10",
+      "title": "Active Inference as a Unified Theory of Sentient Behavior",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "We will discuss the Active Inference perspective on each of these problems (and more) in the context of established theories, such as cybernetics, ideomotor theory of action, reinforcement learning, and optimal control."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "TextbookContent/PlainText/10-ActInf22.txt"
+    },
+    {
+      "unit_id": "parr-2022-notebook-blanket",
+      "title": "Chapter 3",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "The chapter discloses the formal equivalence between the minimization of variational free energy and the maximization of model evidence (or self-evidencing) in approximate Bayesian inference, revealing a connection between free energy and Bayesian perspectives on adaptive systems."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "Chapters/03_blanket.ipynb"
+    },
+    {
+      "unit_id": "parr-2022-notebook-vfe",
+      "title": "Variational Free Energy Simulator",
+      "objectives": [
+        {
+          "objective_id": "obj-1",
+          "statement": "In this section, we recap the basic elements of Bayesian inference and its variational manifestations (Beal 2003, Wainwright and Jordan 2008). In doing so, we hope to provide some intuition for the role of free energy and to emphasize the importance of generative models in drawing inferences about the world."
+        }
+      ],
+      "prerequisites": [],
+      "source_path": "Chapters/VFE.jl"
+    }
+  ],
+  "prerequisite_edges": [
+    {
+      "from_unit": "parr-2022-chapter-01",
+      "to_unit": "parr-2022-chapter-02",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 2, we set out the low road perspective on Active Inference."
+    },
+    {
+      "from_unit": "parr-2022-chapter-02",
+      "to_unit": "parr-2022-chapter-03",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 3, we will illustrate the complementary high road perspective on Active Inference."
+    },
+    {
+      "from_unit": "parr-2022-chapter-03",
+      "to_unit": "parr-2022-chapter-04",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 4, we will unpack Active Inference more formally."
+    },
+    {
+      "from_unit": "parr-2022-chapter-04",
+      "to_unit": "parr-2022-chapter-05",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 5, we will move from formal treatments to biological implications of Active Inference."
+    },
+    {
+      "from_unit": "parr-2022-chapter-05",
+      "to_unit": "parr-2022-chapter-06",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 6, we introduce a recipe to build Active Inference models."
+    },
+    {
+      "from_unit": "parr-2022-chapter-06",
+      "to_unit": "parr-2022-chapter-07",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 7, we discuss Active Inference models that address problems formulated in discrete time; for example, as hidden Markov models (HMMs) or partially observable Markov decision processes (POMDPs)."
+    },
+    {
+      "from_unit": "parr-2022-chapter-07",
+      "to_unit": "parr-2022-chapter-08",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 8, we discuss Active Inference models that address problems formulated in continuous time, using stochastic differential equations."
+    },
+    {
+      "from_unit": "parr-2022-chapter-08",
+      "to_unit": "parr-2022-chapter-09",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 9, we illustrate how to use Active Inference models to analyze data from behavioral experiments."
+    },
+    {
+      "from_unit": "parr-2022-chapter-09",
+      "to_unit": "parr-2022-chapter-10",
+      "kind": "soft",
+      "rationale": "Book order in TextbookContent/PlainText/1-ActInf22.txt, section 1.4: In chapter 10, we discuss the relations between Active Inference and other theories in psychology, neuroscience, AI, and philosophy."
+    }
+  ],
+  "glossary": []
+}
