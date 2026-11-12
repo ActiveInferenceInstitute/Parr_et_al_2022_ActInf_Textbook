@@ -14,7 +14,13 @@ pinned repository, tag and revision. This script
    `input/gnn_files/basics/static_perception.md` exemplar, parses and
    type-checks.
 
-It prints one JSON receipt. It needs network access (pip and
+The type checker returns True when every file validates, 2 when files are
+invalid or none were found, and False on a hard failure; only True passes.
+
+It prints one JSON receipt whose `scope` and `result` depend on the source:
+`repository sketches` / `repository-content-passed`, or `pinned GNN exemplar
+baseline` / `pinned-exemplar-baseline-passed` (the pipeline and pin work, but
+no repository content was checked). It needs network access (pip and
 raw.githubusercontent.com) and a CPython that satisfies the pinned package.
 
 Run:  ./run.sh gnn   (or: python3 scripts/check_gnn_conformance.py)
@@ -36,6 +42,10 @@ ROOT = Path(__file__).resolve().parent.parent
 PIN_PATH = ROOT / ".github" / "gnn-pin.json"
 SCHEMA = "gnn-importer-pin/v1"
 EXEMPLAR = "input/gnn_files/basics/static_perception.md"
+RECEIPTS = {
+    "repository": ("repository sketches", "repository-content-passed"),
+    "pinned-exemplar": ("pinned GNN exemplar baseline", "pinned-exemplar-baseline-passed"),
+}
 CANDIDATES = ("python3", "python3.14", "python3.13", "python3.12", "python3.11")
 REVISION_RE = re.compile(r"^[0-9a-f]{40}$")
 TAG_RE = re.compile(r"^v[0-9]")
@@ -193,22 +203,30 @@ def verify(target: str) -> int:
             parsed = parse_gnn_formal(sketch)
             if parsed is None or getattr(parsed, "parse_errors", None):
                 raise SystemExit(f"gnn: {sketch} did not parse cleanly")
-            valid, errors = validate_gnn_syntax(sketch.read_text(encoding="utf-8"))
+            valid, errors = validate_gnn_syntax(sketch.read_text(encoding="utf-8"), is_content=True)
             if not valid:
                 raise SystemExit(f"gnn: {sketch} syntax errors: {errors!r}")
             shutil.copy2(sketch, model_dir / sketch.name)
 
-        if not GNNTypeChecker().validate_gnn_files(model_dir, Path(output_dir)):
-            raise SystemExit("gnn: type checker rejected the parsed document(s)")
+        # True only when every file validates; 2 means invalid files or none
+        # found, False a hard failure. A truthiness test would let 2 pass.
+        outcome = GNNTypeChecker().validate_gnn_files(model_dir, Path(output_dir))
+        if outcome is not True:
+            raise SystemExit(
+                f"gnn: type checker did not pass the {source} document(s) "
+                f"(returned {outcome!r}; expected True)"
+            )
 
+    scope, result = RECEIPTS[source]
     print(
         json.dumps(
             {
                 "gnn-version": __version__,
                 "pin-revision": pin["revision"],
                 "models": len(sources),
+                "scope": scope,
                 "source": source,
-                "result": "verified",
+                "result": result,
             },
             sort_keys=True,
         )

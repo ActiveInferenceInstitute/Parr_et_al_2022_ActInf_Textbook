@@ -20,7 +20,7 @@ job execute the same command line.
 | `plaintext` | `python3 scripts/clean_plaintext.py` | The non-whitespace integrity invariant holds across `TextbookContent/PlainText/*.txt`; nothing is written. | `plaintext` / `python arms (lint, docs, plaintext)` |
 | `docs` | `python3 scripts/check_docs.py` | Every relative link in tracked Markdown resolves; every page under `docs/` is reachable from [`documentation-index.md`](documentation-index.md), and the hub links that index. | `plaintext` / `python arms (lint, docs, plaintext)` |
 | `vfe` | `julia Chapters/test_vfe.jl` | The VFE simulator's mathematics: normalized posterior, free energy minimised at the exact posterior, inference lowers it, finiteness on the interior. | `vfe` / `VFE regression tests` |
-| `gnn` | `python3 scripts/check_gnn_conformance.py` | The pinned GNN parser installs at the pin's revision, its version equals the pin's tag, and every repository `*.gnn.md` sketch — or the pinned upstream exemplar when there is none — parses and type-checks. | `gnn-conformance` / `gnn conformance (pinned)` |
+| `gnn` | `python3 scripts/check_gnn_conformance.py` | The pinned GNN parser installs at the pin's revision, its version equals the pin's tag, and every repository `*.gnn.md` sketch — or the pinned upstream exemplar when there is none — parses and type-checks (the type checker must return exactly `True`); the receipt's `scope`/`result` distinguish repository content from the pinned-exemplar baseline. | `gnn-conformance` / `gnn conformance (pinned)` |
 
 There is no `types` arm: the repository ships no type checker and nothing that
 would consume one. `lint` deliberately stops at syntax and JSON validity for the

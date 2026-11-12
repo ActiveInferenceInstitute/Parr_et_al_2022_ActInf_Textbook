@@ -19,7 +19,11 @@ What the arm parses:
    `input/gnn_files/basics/static_perception.md` exemplar at the pin's revision.
 
 It also verifies that the installed parser's version equals the pin's tag. The
-result is a pipeline and pin conformance baseline, not a claim that this
+type checker returns `True` when every file validates, `2` when files are
+invalid or none were found, and `False` on a hard failure; only `True` passes.
+The printed receipt names what was checked: `scope` `repository sketches` with
+`result` `repository-content-passed`, or `scope` `pinned GNN exemplar baseline`
+with `result` `pinned-exemplar-baseline-passed`. The result is a pipeline and pin conformance baseline, not a claim that this
 repository already contains a model. The arm needs network access and a CPython
 that satisfies the pinned package's `requires-python` (`>=3.11,<3.15`, read from
 the pinned revision); see [`../docs/validation.md`](../docs/validation.md).
