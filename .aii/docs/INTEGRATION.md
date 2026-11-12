@@ -47,8 +47,13 @@
 | `Chapters/test_vfe.jl` | `test` | Julia regression tests for the VFE simulator. |
 | `Chapters/03_blanket.ipynb` | `notebook` | Chapter 3 (Markov blankets) Jupyter notes. |
 | `scripts/clean_plaintext.py` | `tool` | Deterministic PlainText cleaning pipeline (footers/page numbers). |
-| `docs` | `doc` | Documentation index and topic guides (plaintext content, chapters, validation). |
-| `.github/workflows/ci.yml` | `code` | CI workflow for the plaintext integrity check, the VFE regression suite, and the pinned GNN conformance baseline. |
+| `run.sh` | `tool` | Single gate entry point; the CI workflow calls its arms. |
+| `scripts/lint_sources.py` | `tool` | Lint arm - tracked Python compiles, tracked JSON/notebooks parse. |
+| `scripts/check_docs.py` | `tool` | Docs arm - relative links resolve and docs/ pages are indexed. |
+| `scripts/check_gnn_conformance.py` | `tool` | GNN arm - pinned parser conformance read from .github/gnn-pin.json. |
+| `scripts/gate_report.py` | `tool` | Report arm - writes docs/_generated/GATES.md with measured wall times. |
+| `docs` | `doc` | Documentation hub, flat index, and topic guides (plaintext content, chapters, validation). |
+| `.github/workflows/ci.yml` | `code` | CI workflow calling the ./run.sh arms (lint, docs, plaintext, vfe, gnn). |
 | `CONTRIBUTING.md` | `doc` | Contribution scope, conventions, and verification commands. |
 | `CITATION.cff` | `doc` | Machine-readable citation metadata for the textbook and this repository. |
 | `TODO.md` | `doc` | Dated documentation backlog with open and deferred items. |
