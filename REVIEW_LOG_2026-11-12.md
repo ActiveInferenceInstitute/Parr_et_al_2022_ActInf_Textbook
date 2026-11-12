@@ -83,3 +83,14 @@ Run from the repository root; every command below exited 0 after the change:
   would consume either.
 - There is no `manuscript/` directory, so no manuscript render was added or
   changed.
+
+## Follow-up — P3: the GNN unit tests were manual-only
+
+`scripts/test_check_gnn_conformance.py` merged in #13 (`bd7abee`) but no arm and
+no CI job invoked it. On the pre-change tree, one deliberately broken assertion
+left `./run.sh fast` and `./run.sh full` at exit 0; only a manual
+`python3 -m unittest scripts.test_check_gnn_conformance` failed. The `tests` arm
+(`python3 -m unittest scripts.test_check_gnn_conformance`) now runs in `fast`,
+`full`, and the `python arms` CI job. It measured 0.10 s on the host named in
+[`docs/_generated/GATES.md`](docs/_generated/GATES.md) and needs no network or
+parser install. Closed in #14.

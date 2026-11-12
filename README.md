@@ -47,12 +47,12 @@ scripts/
   lint_sources.py                    — `./run.sh lint` arm: Python compiles, JSON parses
   check_docs.py                      — `./run.sh docs` arm: relative links and docs index
   check_gnn_conformance.py           — `./run.sh gnn` arm: pinned GNN parser conformance
-  test_check_gnn_conformance.py      — unit tests for that arm's fail-closed type check and receipt labels
+  test_check_gnn_conformance.py      — `./run.sh tests` arm: unit tests for the GNN arm's fail-closed type check and receipt labels
   gate_report.py                     — `./run.sh report` arm: writes docs/_generated/GATES.md
 run.sh                               — single gate entry point; CI calls its arms
 .aii/config.yaml                     — InstituteOS sidecar metadata manifest
-.github/workflows/ci.yml             — CI: calls the ./run.sh arms (lint, docs, plaintext,
-                                       vfe, gnn)
+.github/workflows/ci.yml             — CI: calls the ./run.sh arms (lint, tests, docs,
+                                       plaintext, vfe, gnn)
 CONTRIBUTING.md                      — contribution scope and verification commands
 CITATION.cff                         — machine-readable citation metadata
 LICENSE                              — CC-BY-4.0
@@ -82,13 +82,13 @@ arms (`.github/workflows/ci.yml`):
 
 ```bash
 ./run.sh --list   # every arm and its exact command
-./run.sh fast     # lint + plaintext + docs
+./run.sh fast     # lint + tests + plaintext + docs
 ./run.sh full     # every arm, including the Julia suite and the GNN pin
 ```
 
-`plaintext` checks the integrity invariant, `vfe` runs the simulator's
-mathematics, `gnn` checks the pinned GNN conformance baseline
-(see `.github/GNN.md`). Arm details are in
+`plaintext` checks the integrity invariant, `tests` runs the GNN conformance
+script's unit tests, `vfe` runs the simulator's mathematics, `gnn` checks the
+pinned GNN conformance baseline (see `.github/GNN.md`). Arm details are in
 [`docs/validation.md`](docs/validation.md); measured wall times are in
 [`docs/_generated/GATES.md`](docs/_generated/GATES.md). The Pluto notebook
 itself is interactive and is not executed in CI.

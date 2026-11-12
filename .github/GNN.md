@@ -27,3 +27,8 @@ with `result` `pinned-exemplar-baseline-passed`. The result is a pipeline and pi
 repository already contains a model. The arm needs network access and a CPython
 that satisfies the pinned package's `requires-python` (`>=3.11,<3.15`, read from
 the pinned revision); see [`../docs/validation.md`](../docs/validation.md).
+
+The script's unit tests are the `tests` arm, `./run.sh tests`. They replace the
+parser with fixed-result modules, so they need neither network nor the pinned
+install, and they assert that a type-checker result other than `True` exits 1 and
+that the receipt labels its source.

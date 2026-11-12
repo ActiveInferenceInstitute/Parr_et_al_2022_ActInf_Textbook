@@ -4,6 +4,7 @@ name: ci
 # here. Arms and what each proves: docs/validation.md.
 #
 #   lint       tracked Python compiles, tracked JSON/notebooks parse
+#   tests      the GNN conformance script's fail-closed type check and receipt labels
 #   docs       relative links resolve, docs/ pages reachable from the index
 #   plaintext  the plaintext integrity invariant (report only, writes nothing)
 #   vfe        Chapters/test_vfe.jl, the VFE simulator's mathematics
@@ -33,12 +34,14 @@ jobs:
   # runner's own python3 and installs nothing.
   plaintext:
     timeout-minutes: 15
-    name: python arms (lint, docs, plaintext)
+    name: python arms (lint, tests, docs, plaintext)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint tracked sources
         run: ./run.sh lint
+      - name: Run the GNN conformance unit tests
+        run: ./run.sh tests
       - name: Check documentation links and index coverage
         run: ./run.sh docs
       - name: Check the plaintext integrity invariant
