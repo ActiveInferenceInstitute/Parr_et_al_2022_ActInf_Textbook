@@ -47,6 +47,7 @@ scripts/
   lint_sources.py                    — `./run.sh lint` arm: Python compiles, JSON parses
   check_docs.py                      — `./run.sh docs` arm: relative links and docs index
   check_gnn_conformance.py           — `./run.sh gnn` arm: pinned GNN parser conformance
+  test_check_gnn_conformance.py      — unit tests for that arm's fail-closed type check and receipt labels
   gate_report.py                     — `./run.sh report` arm: writes docs/_generated/GATES.md
 run.sh                               — single gate entry point; CI calls its arms
 .aii/config.yaml                     — InstituteOS sidecar metadata manifest
