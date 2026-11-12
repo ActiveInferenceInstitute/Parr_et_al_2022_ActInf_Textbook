@@ -75,7 +75,8 @@ artifacts:
     chapters, validation).
 - path: .github/workflows/ci.yml
   kind: code
-  description: CI workflow calling the ./run.sh arms (lint, docs, plaintext, vfe, gnn).
+  description: CI workflow calling the ./run.sh arms (lint, docs, plaintext, vfe,
+    gnn).
 - path: CONTRIBUTING.md
   kind: doc
   description: Contribution scope, conventions, and verification commands.
@@ -117,12 +118,14 @@ tasks:
 docs:
 - README.md
 - AGENTS.md
-- CONTRIBUTING.md
+- ../CONTRIBUTING.md
 - docs/README.md
-- docs/documentation-index.md
-- docs/validation.md
-- docs/chapters.md
-- docs/plaintext-content.md
-- docs/_generated/GATES.md
-- .github/GNN.md
+- ../docs/documentation-index.md
+- ../docs/validation.md
+- ../docs/chapters.md
+- ../docs/plaintext-content.md
+- ../docs/_generated/GATES.md
+- ../.github/GNN.md
+- docs/AGENTS.md
+- docs/INTEGRATION.md
 schema: aii-sidecar/v1
