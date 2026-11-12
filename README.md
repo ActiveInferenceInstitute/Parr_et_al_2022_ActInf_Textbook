@@ -85,7 +85,7 @@ repository, or in the book behind it, needs a written specification.
 
 - [GNN syntax reference](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/main/docs/gnn/gnn_syntax.md)
   — the format specification. That link follows the repository's `main` branch
-  rather than a pinned revision; the separate CI conformance job pins its own
+  rather than a pinned revision; the separate CI baseline job pins its own
   GNN revision in [`.github/gnn-pin.json`](.github/gnn-pin.json).
 - [GNN Syntax Track](https://github.com/ActiveInferenceInstitute/courses/tree/main/course_development/gnn/01_gnn_syntax)
   — its `models/static_perception.md` is the closest worked example to
