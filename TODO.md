@@ -74,6 +74,15 @@ cross-cutting refactor.
   a `../` prefix and the two `.aii/docs` pages are listed. Paths:
   `.aii/config.yaml`, `.aii/docs/INTEGRATION.md`. **Completed in `3977a98`
   (#11).**
+- [x] **M14 — Wire the GNN unit tests into the gate.** The unit tests merged
+  with the fail-closed type check (#13) were manual-only: no `run.sh` arm and no
+  CI job ran them, so a broken unit test left `./run.sh fast` and `./run.sh full`
+  green. Add the `tests` arm
+  (`python3 -m unittest scripts.test_check_gnn_conformance`), include it in
+  `fast` and `full`, and run it in the `python arms` CI job. Paths: `run.sh`,
+  `.github/workflows/ci.yml`, `docs/validation.md`, `README.md`, `AGENTS.md`,
+  `CONTRIBUTING.md`, `docs/README.md`, `.github/GNN.md`,
+  `docs/_generated/GATES.md`. **Completed in #14.**
 
 ## Major
 
