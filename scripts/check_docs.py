@@ -32,11 +32,11 @@ SCHEME_RE = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|//)")
 REFERENCE_RE = re.compile(r" {0,3}\[((?:\\.|[^\]\\\n])+)\]:[ \t]*")
 FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 ESCAPE_RE = re.compile(r"\\([" + re.escape(string.punctuation) + r"])")
-ATX_HEADING_RE = re.compile(r" {0,3}#{1,6}(?:[ \t]|$)")
+ATX_HEADING_RE = re.compile(r" {0,3}#{1,6}(?:[ \t]|$)", re.MULTILINE)
 BLOCK_BREAK_RE = re.compile(
     r"\n(?:[ \t]*\n| {0,3}(?:#{1,6}(?:[ \t]|$)|>|[-+*][ \t]|"
-    r"[0-9]{1,9}[.)][ \t]|(?:[-*_][ \t]*){3,}(?:\n|$)|"
-    r"(?:=+|-+)[ \t]*(?:\n|$)|<[/!?A-Za-z]))"
+    r"0{0,8}1[.)][ \t]+(?=\S)|(?:[-*_][ \t]*){3,}(?:\n|$)|"
+    r"(?:=+|-+)[ \t]*(?:\n|$)|<[/!?A-Za-z]))", re.MULTILINE
 )
 ENTITY_RE = re.compile(r"&(?:#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6}|[A-Za-z][A-Za-z0-9]+);")
 
