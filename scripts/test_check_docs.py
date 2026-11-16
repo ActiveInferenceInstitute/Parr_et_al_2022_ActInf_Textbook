@@ -97,6 +97,19 @@ class DestinationTests(unittest.TestCase):
         )
         self.assertEqual(self.targets("`open\n[hidden](missing.md) close`\n"), [])
 
+    def test_code_spans_stop_at_nonblank_block_interruptions(self):
+        for interruption in (
+            "# Heading", "> quotation", "- list item", "1. list item",
+            "---", "===", "<div>",
+        ):
+            with self.subTest(interruption=interruption):
+                text = f"`open\n{interruption}\n[broken](missing.md)\n`close\n"
+                self.assertEqual(self.targets(text), [(3, "missing.md")])
+        self.assertEqual(
+            self.targets("# `open\n[broken](missing.md)\n`close\n"),
+            [(2, "missing.md")],
+        )
+
     def test_only_complete_markdown_entities_are_decoded(self):
         for raw, expected in (
             ("notes&copy.md", "notes&copy.md"),

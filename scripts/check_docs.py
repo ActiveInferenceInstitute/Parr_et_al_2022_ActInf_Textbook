@@ -32,7 +32,12 @@ SCHEME_RE = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|//)")
 REFERENCE_RE = re.compile(r" {0,3}\[((?:\\.|[^\]\\\n])+)\]:[ \t]*")
 FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 ESCAPE_RE = re.compile(r"\\([" + re.escape(string.punctuation) + r"])")
-PARAGRAPH_BREAK_RE = re.compile(r"\n[ \t]*\n")
+ATX_HEADING_RE = re.compile(r" {0,3}#{1,6}(?:[ \t]|$)")
+BLOCK_BREAK_RE = re.compile(
+    r"\n(?:[ \t]*\n| {0,3}(?:#{1,6}(?:[ \t]|$)|>|[-+*][ \t]|"
+    r"[0-9]{1,9}[.)][ \t]|(?:[-*_][ \t]*){3,}(?:\n|$)|"
+    r"(?:=+|-+)[ \t]*(?:\n|$)|<[/!?A-Za-z]))"
+)
 ENTITY_RE = re.compile(r"&(?:#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6}|[A-Za-z][A-Za-z0-9]+);")
 
 
@@ -198,8 +203,13 @@ def _code_span_end(text: str, start: int) -> int:
     while end < len(text) and text[end] == "`":
         end += 1
     delimiter = text[start:end]
-    paragraph_break = PARAGRAPH_BREAK_RE.search(text, end)
-    limit = paragraph_break.start() if paragraph_break else len(text)
+    block_break = BLOCK_BREAK_RE.search(text, end)
+    limit = block_break.start() if block_break else len(text)
+    line_start = text.rfind("\n", 0, start) + 1
+    if ATX_HEADING_RE.match(text, line_start):
+        heading_end = text.find("\n", end)
+        if heading_end != -1:
+            limit = min(limit, heading_end)
     candidate = text.find(delimiter, end, limit)
     while candidate != -1:
         after = candidate + len(delimiter)
