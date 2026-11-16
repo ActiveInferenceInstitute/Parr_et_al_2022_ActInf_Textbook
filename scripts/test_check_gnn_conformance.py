@@ -21,6 +21,8 @@ import types
 import unittest
 from pathlib import Path
 
+from scripts.git_test_support import GitFixtureTests
+
 SCRIPT = Path(__file__).resolve().parent / "check_gnn_conformance.py"
 SPEC = importlib.util.spec_from_file_location("check_gnn_conformance", SCRIPT)
 module = importlib.util.module_from_spec(SPEC)
@@ -95,7 +97,7 @@ class VersionTests(unittest.TestCase):
                 module.version_tuple(malformed)
 
 
-class TrackedSourceTests(unittest.TestCase):
+class TrackedSourceTests(GitFixtureTests):
     def test_tracked_equal_basenames_reach_distinct_staged_documents(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -153,7 +155,7 @@ class TrackedSourceTests(unittest.TestCase):
                     module.tracked_sketches(root)
 
 
-class VerifyTests(unittest.TestCase):
+class VerifyTests(GitFixtureTests):
     def run_verify(self, outcome, with_sketch, names=("m.gnn.md",)):
         calls: list = []
         saved_modules = dict(sys.modules)

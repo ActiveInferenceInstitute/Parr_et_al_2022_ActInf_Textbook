@@ -11,6 +11,7 @@ import unittest
 from pathlib import Path
 
 from scripts.check_docs import link_targets, main, relative_target
+from scripts.git_test_support import GitFixtureTests, require_safe_git_environment
 
 
 class DestinationTests(unittest.TestCase):
@@ -89,8 +90,39 @@ class DestinationTests(unittest.TestCase):
         )
         self.assertEqual(self.targets(text), [(1, "real.md")])
 
+    def test_code_spans_do_not_cross_paragraph_boundaries(self):
+        self.assertEqual(
+            self.targets("`open\n\n[broken](missing.md)\n\n`close\n"),
+            [(3, "missing.md")],
+        )
+        self.assertEqual(self.targets("`open\n[hidden](missing.md) close`\n"), [])
 
-class DocumentationGateTests(unittest.TestCase):
+    def test_only_complete_markdown_entities_are_decoded(self):
+        for raw, expected in (
+            ("notes&copy.md", "notes&copy.md"),
+            ("notes&copy;.md", "notes©.md"),
+            ("notes&notit;.md", "notes&notit;.md"),
+            ("notes&#65.md", "notes&#65.md"),
+            ("notes&#65;.md", "notesA.md"),
+            ("notes&#x41;.md", "notesA.md"),
+        ):
+            with self.subTest(raw=raw):
+                self.assertEqual(self.targets(f"[page]({raw})\n"), [(1, expected)])
+
+
+class FixtureEnvironmentTests(unittest.TestCase):
+    def test_repository_and_object_selectors_are_refused(self):
+        for name in (
+            "GIT_DIR", "GIT_COMMON_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
+            "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+            "GIT_CONFIG_COUNT", "GIT_CONFIG_GLOBAL", "GIT_TRACE", "GIT_SSH_COMMAND",
+        ):
+            with self.subTest(name=name), self.assertRaises(RuntimeError):
+                require_safe_git_environment({name: "/outside/fixture"})
+        require_safe_git_environment({"GIT_OPTIONAL_LOCKS": "0", "GIT_PAGER": "cat"})
+
+
+class DocumentationGateTests(GitFixtureTests):
     def repository(self, root: Path) -> None:
         files = {
             "README.md": '[Hub](docs/README.md "Documentation")\n',

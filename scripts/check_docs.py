@@ -24,6 +24,7 @@ import subprocess
 import sys
 import urllib.parse
 from pathlib import Path
+from html.entities import html5
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -31,6 +32,8 @@ SCHEME_RE = re.compile(r"^(?:[a-zA-Z][a-zA-Z0-9+.-]*:|//)")
 REFERENCE_RE = re.compile(r" {0,3}\[((?:\\.|[^\]\\\n])+)\]:[ \t]*")
 FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 ESCAPE_RE = re.compile(r"\\([" + re.escape(string.punctuation) + r"])")
+PARAGRAPH_BREAK_RE = re.compile(r"\n[ \t]*\n")
+ENTITY_RE = re.compile(r"&(?:#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6}|[A-Za-z][A-Za-z0-9]+);")
 
 
 def tracked_markdown(root: Path = ROOT) -> list[Path]:
@@ -195,12 +198,14 @@ def _code_span_end(text: str, start: int) -> int:
     while end < len(text) and text[end] == "`":
         end += 1
     delimiter = text[start:end]
-    candidate = text.find(delimiter, end)
+    paragraph_break = PARAGRAPH_BREAK_RE.search(text, end)
+    limit = paragraph_break.start() if paragraph_break else len(text)
+    candidate = text.find(delimiter, end, limit)
     while candidate != -1:
         after = candidate + len(delimiter)
         if text[candidate - 1] != "`" and (after == len(text) or text[after] != "`"):
             return after
-        candidate = text.find(delimiter, after)
+        candidate = text.find(delimiter, after, limit)
     return end
 
 
@@ -237,7 +242,11 @@ def link_targets(path: Path) -> list[tuple[int, str]]:
 
 def relative_target(raw: str) -> str | None:
     """Normalize a parsed destination; retain significant spaces inside angle links."""
-    target = html.unescape(ESCAPE_RE.sub(r"\1", raw))
+    target = ENTITY_RE.sub(
+        lambda match: html.unescape(match[0]) if match[0].startswith("&#")
+        else html5.get(match[0][1:], match[0]),
+        ESCAPE_RE.sub(r"\1", raw),
+    )
     if not target or target.startswith("#") or SCHEME_RE.match(target):
         return None
     target = target.split("#", 1)[0].split("?", 1)[0]
