@@ -36,7 +36,7 @@ WRAP = 100       # wrap width
 
 
 def wrap_long_line(line: str) -> list:
-    """Wrap a single long line into <=WRAP chunks. Never merges across lines."""
+    """Wrap one line unless a chunk would become removable on the next pass."""
     if len(line) <= MAX_LINE:
         return [line]
     words = line.split()
@@ -51,6 +51,9 @@ def wrap_long_line(line: str) -> list:
             cur = w
     if cur:
         out.append(cur)
+    # A prose reference must not become pagination/footer evidence after wrapping.
+    if any(PAGENUM_RE.fullmatch(chunk) or FOOTER_RE.match(chunk) for chunk in out):
+        return [line]
     return out
 
 

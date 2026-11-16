@@ -57,6 +57,23 @@ class CleanerTests(unittest.TestCase):
             "".join(character for character in expected if not character.isspace()),
         )
 
+    def test_wrapping_does_not_create_removable_lines(self):
+        footer = "Downloaded from http://direct.mit.edu/book by guest on Monday"
+        for marker in ("Page 12", "page 13 of 100", footer):
+            for prose in (
+                ("derivation " * 18) + marker,
+                marker + " " + ("z" * 95 + " ") * 2,
+                ("derivation " * 18) + marker + " " + "z" * 95,
+            ):
+                with self.subTest(marker=marker, prose=prose):
+                    original = prose.rstrip() + "\n"
+                    cleaned, footers, pages, removed = clean_text(original)
+                    self.assertEqual((footers, pages, removed), (0, 0, 0))
+                    self.assertEqual(clean_text(cleaned), (cleaned, 0, 0, 0))
+                    self.assertEqual(
+                        "".join(original.split()), "".join(cleaned.split()),
+                    )
+
     def test_report_only_preserves_original_file_bytes(self):
         original = b"\xef\xbb\xbfDerivation\r\n\r\nx\r\n\r\nPage 12\r\n"
         with tempfile.TemporaryDirectory() as directory:

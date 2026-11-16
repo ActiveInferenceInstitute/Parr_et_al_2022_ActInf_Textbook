@@ -25,6 +25,8 @@ deterministic cleaner. It removes recognized MIT Press download footers and
 explicit positive-decimal `Page N` / `Page N of M` lines, and wraps long prose.
 Bare integers, Roman numerals (`x`, `i`, `iv`), mixed notation and ordinary page
 mentions are retained because they may be mathematical content.
+If wrapping would create a standalone pagination label or download footer, the
+original line stays unwrapped so a later cleaning pass cannot remove prose.
 
 ```bash
 python3 scripts/clean_plaintext.py           # report only, no writes (default)
