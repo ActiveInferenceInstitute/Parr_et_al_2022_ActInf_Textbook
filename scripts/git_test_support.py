@@ -7,6 +7,8 @@ import unittest
 SAFE_GIT_NAMES = frozenset({
     "GIT_TERMINAL_PROMPT", "GIT_OPTIONAL_LOCKS", "GIT_NO_LAZY_FETCH",
     "GIT_HTTP_LOW_SPEED_LIMIT", "GIT_HTTP_LOW_SPEED_TIME",
+    # Restricts parent discovery; cannot redirect explicit fixture-root writes.
+    "GIT_CEILING_DIRECTORIES",
 })
 
 

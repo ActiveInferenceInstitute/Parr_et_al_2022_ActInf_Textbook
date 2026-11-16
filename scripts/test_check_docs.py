@@ -135,7 +135,10 @@ class FixtureEnvironmentTests(unittest.TestCase):
         ):
             with self.subTest(name=name), self.assertRaises(RuntimeError):
                 require_safe_git_environment({name: "/outside/fixture"})
-        require_safe_git_environment({"GIT_OPTIONAL_LOCKS": "0", "GIT_PAGER": "cat"})
+        require_safe_git_environment({
+            "GIT_OPTIONAL_LOCKS": "0", "GIT_PAGER": "cat",
+            "GIT_CEILING_DIRECTORIES": "/outside/fixture",
+        })
 
 
 class DocumentationGateTests(GitFixtureTests):
