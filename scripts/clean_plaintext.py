@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 """Deterministic cleaner for TextbookContent/PlainText/*.txt.
 
-The plaintext files are raw PDF extractions that carry three kinds of noise:
-  1. MIT Press download footers ("Downloaded from http://direct.mit.edu/... by guest on ...")
-  2. Isolated page-number lines (standalone integers and short roman numerals)
-  3. Very long unwrapped prose lines
+Recognized removable material is limited to MIT Press download footers and
+explicit decimal pagination labels: ``Page N`` or ``Page N of M`` (case-insensitive,
+positive integers). A bare integer, roman numeral, ``x``, or ``i`` is not evidence
+of pagination, even when surrounded by blank lines or at a page boundary.
 
-Remediation (all deterministic, content-preserving):
-  * drop footer lines
-  * drop standalone page-number lines (guarded: line must be a pure number / short
-    roman numeral and blank-surrounded, so genuine inline numbers are never touched)
-  * wrap only long prose lines (>= MAX_LINE chars) into <= WRAP lines; a long line is
-    wrapped independently and never merged with neighbouring lines, so standalone
-    equation lines and headers are never disturbed
-  * collapse runs of blank lines and strip trailing whitespace
+The cleaner also wraps long lines independently, collapses blank runs, and strips
+trailing whitespace. It never merges neighbouring nonblank lines.
 
-Integrity guarantee: total non-whitespace characters are preserved exactly except for
-the characters belonging to removed footer/page-number lines. The script checks this
-invariant before reporting success.
+The non-whitespace count check accounts for recognized removals and wrapping.
+It is a mechanical invariant, not proof of scientific fidelity or evidence that
+any existing corpus was damaged. Regeneration remains a separately reviewed step.
 
 Usage:
   python3 scripts/clean_plaintext.py            # report only (no writes)
@@ -35,7 +29,7 @@ TXT_DIR = os.path.join(ROOT, "TextbookContent", "PlainText")
 GLOB = os.path.join(TXT_DIR, "*.txt")
 
 FOOTER_RE = re.compile(r"^Downloaded from http://direct\.mit\.edu/.+ by guest on .+$")
-PAGENUM_RE = re.compile(r"^(?:\d{1,3}|[ivxlcdm]{1,8})$")
+PAGENUM_RE = re.compile(r"^Page [1-9][0-9]*(?: of [1-9][0-9]*)?$", re.IGNORECASE)
 
 MAX_LINE = 110   # lines strictly longer than this get wrapped
 WRAP = 100       # wrap width
@@ -60,24 +54,19 @@ def wrap_long_line(line: str) -> list:
     return out
 
 
-def is_blank_surrounded(lines, idx):
-    prev = lines[idx - 1].strip() if idx > 0 else ""
-    nxt = lines[idx + 1].strip() if idx + 1 < len(lines) else ""
-    return prev == "" and nxt == ""
-
 
 def clean_text(text: str):
     lines = text.split("\n")
     kept = []
     removed_footer = removed_pagenum = 0
     removed_chars = 0
-    for i, raw in enumerate(lines):
+    for raw in lines:
         s = raw.strip()
         if FOOTER_RE.match(s):
             removed_footer += 1
             removed_chars += count_nonws(s)
             continue
-        if PAGENUM_RE.fullmatch(s) and is_blank_surrounded(lines, i):
+        if PAGENUM_RE.fullmatch(s):
             removed_pagenum += 1
             removed_chars += count_nonws(s)
             continue
@@ -110,7 +99,8 @@ def count_nonws(s):
 
 
 def process(path, apply):
-    raw = open(path, encoding="utf-8-sig").read()
+    with open(path, encoding="utf-8-sig") as source:
+        raw = source.read()
     cleaned, nf, np_, nc = clean_text(raw)
 
     # integrity: cleaned must contain exactly (raw - removed line chars) non-ws chars

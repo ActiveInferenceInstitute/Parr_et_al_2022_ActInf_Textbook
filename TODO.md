@@ -1,6 +1,6 @@
 # Documentation TODO — Parr et al. 2022 Active Inference Textbook
 
-**Last reviewed:** 2026-11-12
+**Last reviewed:** 2026-11-13
 
 This backlog records the 2026-08-02 documentation-deep review. Minor means a
 small correction such as a typo, broken link, or formatting issue. Medium means
@@ -91,6 +91,26 @@ cross-cutting refactor.
   plain Markdown. A hosted documentation site would still add maintenance
   without a verified need.
 
+## Bounded qualification — 2026-11-13
+
+- [x] **T1 — Conservative cleaner.** Ambiguous mathematical lines, retained
+  character order, report-only preservation and explicit-file apply controls
+  passed. The observed unclosed-read warning was repaired; no corpus regeneration.
+- [ ] **T2 — Shared VFE model and interactive acceptance.** Shared Julia boundary
+  tests passed, including impossible observations. Pluto is absent from the
+  prepared runtime; actual notebook rendering remains outstanding.
+- [x] **T3 — GNN admission controls.** Tracked-file identity, duplicate basenames,
+  fail-closed verdicts and numeric interpreter constraints passed protocol tests.
+  These do not replace real pinned-upstream/installed-runtime qualification.
+- [x] **T4 — Markdown destinations.** Real-file and parser controls passed;
+  remote links, fragments and full-renderer equivalence are not claimed.
+- [x] **T5 — Actual education consumer.** Explicit-root producer controls and the
+  actual member CLI passed with adopted state and no issues. No validator fork,
+  sibling-layout inference or installed fallback. Hosted producer delivery remains open.
+
+M1–M14 above remain dated history. No generated measurements or release evidence
+were renewed by this focused qualification.
+
 ## Open / deferred
 
 - J1 remains deferred for the reason above: `docs/` is plain Markdown and
@@ -123,14 +143,12 @@ cross-cutting refactor.
   vocabulary, which `README.md` records as a deliberate limit of this
   migration. It does not block bundle emission; authoring terms is curriculum
   work owned by the `courses` content authors.
-- No arm validates the bundle. `./run.sh lint` only parses JSON, and the check
-  that does validate `specs/education/parr-2022.json` against
-  `specs/education/schema.json` is
-  `../courses/software/scripts/check_education_contract.py`, which needs a
-  sibling `courses` checkout and so cannot be a hermetic arm. Owner: repository
-  maintainers; unblocked, but it needs either a vendored validator or an
-  explicitly non-hermetic arm.
+- The education arm now validates this actual member through an explicitly
+  selected qualified `COURSES_ROOT`; its real consumer proof passed locally.
+  CI delivery of that qualified producer remains operationally unqualified.
 - `inferactively-pymdp` has nothing to pin here: the repository ships no
   `requirements.txt`, `pyproject.toml`, or `setup.py`, and every script under
   `scripts/` imports only the standard library.
-- No other findings are intentionally left open after this pass.
+- Keep J1 and TD1–TD8 boundaries: no types/style arm, GNN conversion,
+  notebook-in-CI change, hosted billing claim, unrequested pin migration,
+  glossary invention, pymdp dependency or corpus regeneration.

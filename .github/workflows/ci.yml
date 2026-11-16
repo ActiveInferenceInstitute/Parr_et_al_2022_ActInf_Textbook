@@ -1,18 +1,20 @@
 name: ci
 
-# Every gate is an arm of ./run.sh: the same command line runs locally and
-# here. Arms and what each proves: docs/validation.md.
+# Hosted jobs invoke the same ./run.sh arms used locally, without copied commands.
+# Arms and what each proves: docs/validation.md.
 #
 #   lint       tracked Python compiles, tracked JSON/notebooks parse
-#   tests      the GNN conformance script's fail-closed type check and receipt labels
+#   tests      hermetic cleaner, GNN, Markdown and education-admission regressions
 #   docs       relative links resolve, docs/ pages reachable from the index
 #   plaintext  the plaintext integrity invariant (report only, writes nothing)
 #   vfe        Chapters/test_vfe.jl, the VFE simulator's mathematics
-#   gnn        the pinned GNN parser parses and type-checks the pinned exemplar
+#   gnn        pinned GNN checks of tracked sketches, or the pinned exemplar baseline
 #
-# Not covered: Chapters/VFE.jl is an interactive Pluto.jl notebook with no
-# headless entry point, so no arm executes it; Chapters/test_vfe.jl
-# re-implements the same model deterministically and covers its mathematics.
+# The Pluto UI is not executed here. Chapters/test_vfe.jl and Chapters/VFE.jl
+# use the same Chapters/vfe_model.jl mathematics; the regression arm is headless.
+# Education MemberContractTests and the education arm require an explicitly
+# qualified courses checkout exposing check_member(..., repo_root=...). This
+# workflow does not provision that producer and makes no education-pass claim.
 # Regenerating the plaintext from the PDF stays a reviewed, manual step.
 
 on:
@@ -40,7 +42,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint tracked sources
         run: ./run.sh lint
-      - name: Run the GNN conformance unit tests
+      - name: Run hermetic Python regressions
         run: ./run.sh tests
       - name: Check documentation links and index coverage
         run: ./run.sh docs

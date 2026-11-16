@@ -13,8 +13,9 @@ is a one-file change.
 
 What the arm parses:
 
-1. every `*.gnn.md` sketch in the repository — each must parse and pass the
-   syntax validator, and the parser's type checker must accept the set;
+1. every tracked `*.gnn.md` sketch — missing/replaced tracked files fail,
+   duplicate basenames stage separately, and each must parse, pass syntax
+   validation and receive a literal `True` type verdict;
 2. when the repository declares no sketch yet (as now), the pinned upstream
    `input/gnn_files/basics/static_perception.md` exemplar at the pin's revision.
 
@@ -32,3 +33,9 @@ The script's unit tests are the `tests` arm, `./run.sh tests`. They replace the
 parser with fixed-result modules, so they need neither network nor the pinned
 install, and they assert that a type-checker result other than `True` exits 1 and
 that the receipt labels its source.
+
+The receipt names every checked document. Python admission preserves numeric
+patch precision and supported `~=` semantics and rejects unknown constraint
+syntax before provisioning. Focused local protocol controls passed; they are
+not real upstream/installed-origin proof. No network installation, parser pin
+migration or full GNN gate was performed in this bounded qualification.

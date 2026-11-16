@@ -27,10 +27,10 @@ The default invocation is report-only and checks the non-whitespace integrity in
 
 ## Authored content
 
-- `Chapters/` holds the reading group's computational notes: `VFE.jl` (Pluto.jl), `test_vfe.jl` (Julia regression suite), and `03_blanket.ipynb` (Jupyter, Python standard library). The README documents how to open and run each.
-- `scripts/` also holds one script per gate arm (`lint_sources.py`, `test_check_gnn_conformance.py`, `check_docs.py`,
-`check_gnn_conformance.py`, `gate_report.py`), dispatched by `./run.sh`.
-`CONTRIBUTING.md` documents the cleaner's modes.
+- `Chapters/` holds `VFE.jl`, the shared `vfe_model.jl`, its Julia regression suite,
+  and the standard-library Jupyter notes. Headless tests do not accept Pluto's UI.
+- `scripts/` holds the cleaner, Markdown/GNN checks and explicit-root education
+  adapter with focused regressions. Use `./run.sh --list` for the exact registry.
 - `.aii/config.yaml` is the InstituteOS sidecar; `.github/workflows/ci.yml` calls the `./run.sh` arms — `lint`, `tests`, `docs`, `plaintext`, `vfe` and the pinned `gnn` conformance check (see `.github/GNN.md`) — on pushes to `main` and pull requests targeting `main`.
 
 ## Verification
@@ -40,8 +40,13 @@ Run the gates relevant to your change through the single entry point:
 ```bash
 ./run.sh --list   # every arm and its exact command
 ./run.sh fast     # lint + tests + plaintext + docs
-./run.sh full     # every arm
+COURSES_ROOT=/absolute/path/to/qualified/courses ./run.sh full
 ```
+
+`education` is a separately runnable real producer/member arm and is not in
+hermetic `fast`. Select an already qualified courses checkout; never substitute
+an installed validator or infer a sibling layout. CI does not yet supply that
+qualified producer. GitVault commands require governed test admission.
 
 `docs/validation.md` is the arm reference, and CI calls these same arms. Never
 hand-edit a number that `./run.sh report` writes into

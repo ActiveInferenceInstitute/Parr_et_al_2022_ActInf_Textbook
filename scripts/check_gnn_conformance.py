@@ -76,20 +76,31 @@ def fetch(repository: str, revision: str, path: str) -> bytes:
 
 
 def version_tuple(text: str) -> tuple[int, ...]:
-    return tuple(int(part) for part in re.findall(r"\d+", text)[:2])
+    """Read a numeric release without discarding patch or later components."""
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", text):
+        raise ValueError(f"unsupported numeric release {text!r}")
+    return tuple(int(part) for part in text.split("."))
+
+
+def parse_requires_python(spec: str) -> list[tuple[str, tuple[int, ...]]]:
+    """Parse the supported numeric specifier subset, rejecting every unknown clause."""
+    clauses: list[tuple[str, tuple[int, ...]]] = []
+    for clause in spec.split(","):
+        match = re.fullmatch(r"(>=|<=|==|!=|~=|>|<)\s*([0-9]+(?:\.[0-9]+)*)", clause.strip())
+        if match is None:
+            raise ValueError(f"unsupported requires-python clause {clause!r}")
+        operator, bound_text = match.groups()
+        bound = version_tuple(bound_text)
+        if operator == "~=" and len(bound) < 2:
+            raise ValueError(f"compatible release requires at least major.minor: {clause!r}")
+        clauses.append((operator, bound))
+    return clauses
 
 
 def satisfies(version: tuple[int, ...], spec: str) -> bool:
-    """Match a `major.minor` against a simple `requires-python` specifier list."""
-    for clause in spec.split(","):
-        clause = clause.strip()
-        if not clause:
-            continue
-        match = re.match(r"(>=|<=|==|~=|>|<)\s*(\d+(?:\.\d+)*)", clause)
-        if not match:
-            return True
-        operator, bound_text = match.groups()
-        bound = version_tuple(bound_text)
+    """Compare complete numeric releases, including PEP 440 compatible-release bounds."""
+    clauses = parse_requires_python(spec)
+    for operator, bound in clauses:
         width = max(len(version), len(bound))
         left = version + (0,) * (width - len(version))
         right = bound + (0,) * (width - len(bound))
@@ -101,24 +112,33 @@ def satisfies(version: tuple[int, ...], spec: str) -> bool:
             return False
         if operator == "<" and not left < right:
             return False
-        if operator == "==" and left[: len(right)] != right:
+        if operator == "==" and left != right:
             return False
-        if operator == "~=" and not (left >= right and left[0] == right[0]):
+        if operator == "!=" and left == right:
             return False
+        if operator == "~=":
+            prefix = bound[:-1]
+            upper = prefix[:-1] + (prefix[-1] + 1,)
+            upper += (0,) * (width - len(upper))
+            if not right <= left < upper:
+                return False
     return True
 
 
 def interpreter_version(executable: str) -> tuple[int, ...] | None:
     try:
         completed = subprocess.run(
-            [executable, "-c", "import sys; print('%d.%d' % sys.version_info[:2])"],
+            [executable, "-c", "import sys; print('.'.join(map(str, sys.version_info[:3])))"],
             check=True,
             capture_output=True,
             text=True,
         )
     except (OSError, subprocess.CalledProcessError):
         return None
-    return version_tuple(completed.stdout.strip())
+    try:
+        return version_tuple(completed.stdout.strip())
+    except ValueError:
+        return None
 
 
 def interpreters() -> list[tuple[str, tuple[int, ...]]]:
@@ -173,6 +193,37 @@ def install(executable: str, target: str, pin: dict) -> bool:
     return True
 
 
+def tracked_sketches(root: Path) -> list[Path]:
+    """Select index-tracked sketches, never untracked or ignored filesystem discoveries."""
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--", "*.gnn.md"],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise SystemExit(f"gnn: cannot list tracked sketches: {error}") from error
+    sketches = sorted(root / os.fsdecode(name) for name in completed.stdout.split(b"\0") if name)
+    for sketch in sketches:
+        if sketch.is_symlink() or not sketch.is_file():
+            raise SystemExit(f"gnn: tracked sketch is not a regular file: {sketch.relative_to(root)}")
+    return sketches
+
+
+def stage_documents(
+    sources: list[Path], source_root: Path, destination: Path
+) -> list[tuple[str, Path]]:
+    """Keep each source identity and basename in its own checker input directory."""
+    documents: list[tuple[str, Path]] = []
+    for index, source in enumerate(sources):
+        identity = source.relative_to(source_root).as_posix()
+        staged = destination / str(index) / source.name
+        staged.parent.mkdir(parents=True)
+        shutil.copy2(source, staged)
+        documents.append((identity, staged))
+    return documents
+
+
 def verify(target: str) -> int:
     sys.path.insert(0, target)
     from gnn import __version__
@@ -184,38 +235,42 @@ def verify(target: str) -> int:
     if __version__ != expected:
         raise SystemExit(f"gnn: installed {__version__!r} does not match pin tag {pin['tag']!r}")
 
-    sketches = sorted(
-        path for path in ROOT.rglob("*.gnn.md") if ".git" not in path.parts
-    )
+    sketches = tracked_sketches(ROOT)
+    checked_documents: list[str] = []
     with tempfile.TemporaryDirectory(prefix="gnn-check-") as output_dir:
-        model_dir = Path(output_dir) / "models"
-        model_dir.mkdir()
+        output = Path(output_dir)
         if sketches:
             sources = sketches
             source = "repository"
+            source_root = ROOT
         else:
-            exemplar = Path(output_dir) / Path(EXEMPLAR).name
+            source_root = output / "exemplar"
+            exemplar = source_root / EXEMPLAR
+            exemplar.parent.mkdir(parents=True)
             exemplar.write_bytes(fetch(pin["repository"], pin["revision"], EXEMPLAR))
             sources = [exemplar]
             source = "pinned-exemplar"
 
-        for sketch in sources:
+        documents = stage_documents(sources, source_root, output / "models")
+        for index, (identity, sketch) in enumerate(documents):
             parsed = parse_gnn_formal(sketch)
             if parsed is None or getattr(parsed, "parse_errors", None):
-                raise SystemExit(f"gnn: {sketch} did not parse cleanly")
+                raise SystemExit(f"gnn: {identity} did not parse cleanly")
             valid, errors = validate_gnn_syntax(sketch.read_text(encoding="utf-8"), is_content=True)
             if not valid:
-                raise SystemExit(f"gnn: {sketch} syntax errors: {errors!r}")
-            shutil.copy2(sketch, model_dir / sketch.name)
+                raise SystemExit(f"gnn: {identity} syntax errors: {errors!r}")
 
-        # True only when every file validates; 2 means invalid files or none
-        # found, False a hard failure. A truthiness test would let 2 pass.
-        outcome = GNNTypeChecker().validate_gnn_files(model_dir, Path(output_dir))
-        if outcome is not True:
-            raise SystemExit(
-                f"gnn: type checker did not pass the {source} document(s) "
-                f"(returned {outcome!r}; expected True)"
-            )
+            # One unchanged basename per directory prevents collisions and does
+            # not rely on whether this pinned checker recurses into subdirectories.
+            report_dir = output / "reports" / str(index)
+            report_dir.mkdir(parents=True)
+            outcome = GNNTypeChecker().validate_gnn_files(sketch.parent, report_dir)
+            if outcome is not True:
+                raise SystemExit(
+                    f"gnn: type checker did not pass {source} document {identity!r} "
+                    f"(returned {outcome!r}; expected True)"
+                )
+            checked_documents.append(identity)
 
     scope, result = RECEIPTS[source]
     print(
@@ -223,7 +278,8 @@ def verify(target: str) -> int:
             {
                 "gnn-version": __version__,
                 "pin-revision": pin["revision"],
-                "models": len(sources),
+                "models": len(checked_documents),
+                "documents": checked_documents,
                 "scope": scope,
                 "source": source,
                 "result": result,
@@ -243,9 +299,15 @@ def main(argv: list[str]) -> int:
         requires = REQUIRES_RE.search(
             fetch(pin["repository"], pin["revision"], "pyproject.toml").decode("utf-8")
         )
-    except OSError:
-        requires = None
-    spec = requires.group(1) if requires else None
+    except OSError as error:
+        raise SystemExit(f"gnn: cannot read pinned requires-python: {error}") from error
+    if requires is None:
+        raise SystemExit("gnn: pinned pyproject.toml has no supported requires-python declaration")
+    spec = requires.group(1)
+    try:
+        parse_requires_python(spec)
+    except ValueError as error:
+        raise SystemExit(f"gnn: {error}") from error
 
     available = interpreters()
     if not available:
