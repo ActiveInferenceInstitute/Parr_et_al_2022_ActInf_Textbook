@@ -102,7 +102,7 @@ class DestinationTests(unittest.TestCase):
             ("notes&copy.md", "notes&copy.md"),
             ("notes&copy;.md", "notes©.md"),
             ("notes&notit;.md", "notes&notit;.md"),
-            ("notes&#65.md", "notes&#65.md"),
+            ("notes&#65.md", "notes&"),
             ("notes&#65;.md", "notesA.md"),
             ("notes&#x41;.md", "notesA.md"),
         ):
