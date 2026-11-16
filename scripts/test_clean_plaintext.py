@@ -58,7 +58,7 @@ class CleanerTests(unittest.TestCase):
         )
 
     def test_wrapping_does_not_create_removable_lines(self):
-        footer = "Downloaded from http://direct.mit.edu/book by guest on Monday"
+        footer = "Downloaded  from http://direct.mit.edu/book by guest on Monday"
         for marker in ("Page 12", "page 13 of 100", footer):
             for prose in (
                 ("derivation " * 18) + marker,
