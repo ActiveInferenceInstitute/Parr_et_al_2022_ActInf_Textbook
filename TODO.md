@@ -105,19 +105,16 @@ cross-cutting refactor.
 - No hosted run is evidence: GitHub Actions is billing-locked for the
   organisation, so every gate result here comes from a local run on the host
   named in [`docs/_generated/GATES.md`](docs/_generated/GATES.md).
-- The GNN pin is behind the rest of the estate: `.github/gnn-pin.json` records
-  `v5.0.3` at `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, while sibling
-  importers already record `v5.1.0` at
-  `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf` with per-file parser digests (for
-  example `../ActiveBlockference/specs/gnn-pin.json`). The bump is not a
-  one-line edit: `scripts/check_gnn_conformance.py` requires `repository` in
-  `OWNER/REPO` form and reads the commit from `revision`, while the `v5.1.0`
-  documents carry a full URL in `repository` and the commit under `commit`, and
-  the arm verifies no `parser_files` digest at all. Owner: whoever owns this
-  repository's GNN adoption, with the GNN release owner for the pin-document
-  shape. It can only be proved by a network run of `./run.sh gnn`, which
-  installs the pinned parser and picks an interpreter that satisfies its
-  `requires-python` (the host default `python3` is 3.15.2).
+- The GNN pin moved to `v5.1.0` on 2026-11-16: `.github/gnn-pin.json` records
+  `v5.1.0` at `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf` (the commit the
+  annotated tag resolves to), keeping this repository's `OWNER/REPO`
+  `repository` and `revision` keys, so `scripts/check_gnn_conformance.py` reads
+  it unchanged. The arm still verifies no `parser_files` digest; adding one is a
+  separate, unrequested change. Locally the arm's `--verify` path passed against
+  a 5.1.0 parser built from that commit; the network install path is proved by
+  the hosted `gnn conformance (pinned)` job. `docs/validation.md` still quotes
+  `v5.0.3` in its GNN conformance paragraph; that paragraph is rewritten by the
+  open validation-docs integration (PR #15), so it is left for that change.
 - The education bundle's glossary is empty, and the lead checker reports
   `0 term(s)`: `specs/education/parr-2022.json` carries no controlled
   vocabulary, which `README.md` records as a deliberate limit of this

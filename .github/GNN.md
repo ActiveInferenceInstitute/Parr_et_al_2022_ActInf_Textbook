@@ -5,8 +5,8 @@
 which is [`../scripts/check_gnn_conformance.py`](../scripts/check_gnn_conformance.py).
 
 The arm reads [`gnn-pin.json`](gnn-pin.json), which pins
-`ActiveInferenceInstitute/Generalized_Notation_Notation` at `v5.0.3`
-(`8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`) under schema
+`ActiveInferenceInstitute/Generalized_Notation_Notation` at `v5.1.0`
+(`75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`) under schema
 `gnn-importer-pin/v1`. The pin file is the only place those values appear: the
 workflow and the script hold no copy of the tag or revision, so bumping the pin
 is a one-file change.
