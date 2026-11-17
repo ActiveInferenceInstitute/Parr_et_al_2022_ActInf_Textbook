@@ -20,14 +20,17 @@ invalid or none were found, and False on a hard failure; only True passes.
 It prints one JSON receipt whose `scope` and `result` depend on the source:
 `repository sketches` / `repository-content-passed`, or `pinned GNN exemplar
 baseline` / `pinned-exemplar-baseline-passed` (the pipeline and pin work, but
-no repository content was checked). It needs network access (pip and
-raw.githubusercontent.com) and a CPython that satisfies the pinned package.
+no repository content was checked). By default it needs network access (pip
+and raw.githubusercontent.com). Explicit externally authenticated offline
+resources retain the same fresh installation and original verdict scope.
 
 Run:  ./run.sh gnn   (or: python3 scripts/check_gnn_conformance.py)
 """
 
 from __future__ import annotations
 
+import contextlib
+import importlib.util
 import json
 import os
 import re
@@ -76,20 +79,31 @@ def fetch(repository: str, revision: str, path: str) -> bytes:
 
 
 def version_tuple(text: str) -> tuple[int, ...]:
-    return tuple(int(part) for part in re.findall(r"\d+", text)[:2])
+    """Read a numeric release without discarding patch or later components."""
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", text):
+        raise ValueError(f"unsupported numeric release {text!r}")
+    return tuple(int(part) for part in text.split("."))
+
+
+def parse_requires_python(spec: str) -> list[tuple[str, tuple[int, ...]]]:
+    """Parse the supported numeric specifier subset, rejecting every unknown clause."""
+    clauses: list[tuple[str, tuple[int, ...]]] = []
+    for clause in spec.split(","):
+        match = re.fullmatch(r"(>=|<=|==|!=|~=|>|<)\s*([0-9]+(?:\.[0-9]+)*)", clause.strip())
+        if match is None:
+            raise ValueError(f"unsupported requires-python clause {clause!r}")
+        operator, bound_text = match.groups()
+        bound = version_tuple(bound_text)
+        if operator == "~=" and len(bound) < 2:
+            raise ValueError(f"compatible release requires at least major.minor: {clause!r}")
+        clauses.append((operator, bound))
+    return clauses
 
 
 def satisfies(version: tuple[int, ...], spec: str) -> bool:
-    """Match a `major.minor` against a simple `requires-python` specifier list."""
-    for clause in spec.split(","):
-        clause = clause.strip()
-        if not clause:
-            continue
-        match = re.match(r"(>=|<=|==|~=|>|<)\s*(\d+(?:\.\d+)*)", clause)
-        if not match:
-            return True
-        operator, bound_text = match.groups()
-        bound = version_tuple(bound_text)
+    """Compare complete numeric releases, including PEP 440 compatible-release bounds."""
+    clauses = parse_requires_python(spec)
+    for operator, bound in clauses:
         width = max(len(version), len(bound))
         left = version + (0,) * (width - len(version))
         right = bound + (0,) * (width - len(bound))
@@ -101,27 +115,37 @@ def satisfies(version: tuple[int, ...], spec: str) -> bool:
             return False
         if operator == "<" and not left < right:
             return False
-        if operator == "==" and left[: len(right)] != right:
+        if operator == "==" and left != right:
             return False
-        if operator == "~=" and not (left >= right and left[0] == right[0]):
+        if operator == "!=" and left == right:
             return False
+        if operator == "~=":
+            prefix = bound[:-1]
+            upper = prefix[:-1] + (prefix[-1] + 1,)
+            upper += (0,) * (width - len(upper))
+            if not right <= left < upper:
+                return False
     return True
 
 
-def interpreter_version(executable: str) -> tuple[int, ...] | None:
+def interpreter_version(executable: str, *, isolated: bool = False) -> tuple[int, ...] | None:
+    arguments = ("-I", "-S", "-B") if isolated else ()
     try:
         completed = subprocess.run(
-            [executable, "-c", "import sys; print('%d.%d' % sys.version_info[:2])"],
+            [executable, *arguments, "-c", "import sys; print('.'.join(map(str, sys.version_info[:3])))"],
             check=True,
             capture_output=True,
             text=True,
         )
     except (OSError, subprocess.CalledProcessError):
         return None
-    return version_tuple(completed.stdout.strip())
+    try:
+        return version_tuple(completed.stdout.strip())
+    except ValueError:
+        return None
 
 
-def interpreters() -> list[tuple[str, tuple[int, ...]]]:
+def interpreters(*, isolated: bool = False) -> list[tuple[str, tuple[int, ...]]]:
     found: list[tuple[str, tuple[int, ...]]] = []
     seen: set[str] = set()
     names = (os.environ.get("GNN_PIN_PYTHON"), *CANDIDATES)
@@ -135,10 +159,78 @@ def interpreters() -> list[tuple[str, tuple[int, ...]]]:
         if real in seen:
             continue
         seen.add(real)
-        version = interpreter_version(executable)
+        version = interpreter_version(executable, isolated=isolated)
         if version is not None:
             found.append((executable, version))
     return found
+
+
+def offline_resources(pin: dict):
+    """Load the sibling consumer only for an explicitly requested offline arm."""
+    if not any(name in os.environ for name in ("GNN_OFFLINE_BUNDLE", "GNN_OFFLINE_MANIFEST_SHA256")):
+        return None
+    name = "_textbook_gnn_offline"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name("gnn_offline.py"))
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+    try:
+        return sys.modules[name].from_environment(pin)
+    except ValueError as error:
+        raise SystemExit(f"gnn: offline resources: {error}") from error
+
+
+def install_offline(executable: str, target: str, pin: dict, bundle) -> bool:
+    """Use real pip, its isolated build backend and the complete locked closure."""
+    helper = sys.modules[type(bundle).__module__]
+    try:
+        destination = Path(target)
+        if (
+            not destination.is_absolute() or not destination.is_dir() or destination.is_symlink()
+            or destination.resolve() != destination or any(destination.iterdir())
+        ):
+            raise ValueError("offline installation requires a new empty canonical target")
+        environment = {
+            key: value for key, value in helper.git_environment().items()
+            if not key.startswith("PIP_") and key not in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP")
+        }
+        environment.update(
+            PIP_CONFIG_FILE=os.devnull, PIP_NO_INDEX="1", PIP_FIND_LINKS=str(bundle.wheelhouse),
+            PIP_NO_CACHE_DIR="1", PIP_DISABLE_PIP_VERSION_CHECK="1", PIP_NO_INPUT="1",
+            PYTHONNOUSERSITE="1", PYTHONDONTWRITEBYTECODE="1",
+        )
+        with tempfile.TemporaryDirectory(prefix="gnn-pip-") as directory:
+            bytecode_root = Path(directory) / "bytecode"
+            bytecode_root.mkdir()
+            command = helper.installer_command(
+                executable, root=bundle.root, runtime=bundle.manifest["runtime"],
+                installer=bundle.manifest["installer"], pip_wheel=bundle.wheels["pip"],
+                bytecode_root=bytecode_root,
+            )
+            environment["PYTHONPYCACHEPREFIX"] = str(bytecode_root)
+            requirements = Path(directory) / "requirements.txt"
+            constraints = Path(directory) / "constraints.txt"
+            requirements.write_text(bundle.requirements(hashes=True), encoding="utf-8")
+            constraints.write_text(bundle.requirements(hashes=False), encoding="utf-8")
+            environment["PIP_CONSTRAINT"] = str(constraints)
+            environment["PIP_BUILD_CONSTRAINT"] = str(constraints)
+            spec = f"generalized-notation-notation @ git+{bundle.source.as_uri()}@{pin['revision']}"
+            for step in (("--require-hashes", "-r", str(requirements)), ("--upgrade", spec)):
+                completed = subprocess.run(
+                    [
+                        *command, "install", "--disable-pip-version-check", "--no-input", "--quiet",
+                        "--no-index", "--find-links", str(bundle.wheelhouse), "--no-cache-dir",
+                        "--no-compile", "--ignore-installed", "--target", target, *step,
+                    ],
+                    stdin=subprocess.DEVNULL, capture_output=True, text=True, env=environment,
+                )
+                if completed.returncode != 0:
+                    print((completed.stderr or completed.stdout).strip(), file=sys.stderr)
+                    return False
+        return True
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"gnn: offline installation: {error}") from error
 
 
 def install(executable: str, target: str, pin: dict) -> bool:
@@ -173,81 +265,154 @@ def install(executable: str, target: str, pin: dict) -> bool:
     return True
 
 
-def verify(target: str) -> int:
+def tracked_sketches(root: Path) -> list[Path]:
+    """Select index-tracked sketches, never untracked or ignored filesystem discoveries."""
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--", "*.gnn.md"],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise SystemExit(f"gnn: cannot list tracked sketches: {error}") from error
+    sketches = sorted(root / os.fsdecode(name) for name in completed.stdout.split(b"\0") if name)
+    for sketch in sketches:
+        if sketch.is_symlink() or not sketch.is_file():
+            raise SystemExit(f"gnn: tracked sketch is not a regular file: {sketch.relative_to(root)}")
+    return sketches
+
+
+def stage_documents(
+    sources: list[Path], source_root: Path, destination: Path
+) -> list[tuple[str, Path]]:
+    """Keep each source identity and basename in its own checker input directory."""
+    documents: list[tuple[str, Path]] = []
+    for index, source in enumerate(sources):
+        identity = source.relative_to(source_root).as_posix()
+        staged = destination / str(index) / source.name
+        staged.parent.mkdir(parents=True)
+        shutil.copy2(source, staged)
+        documents.append((identity, staged))
+    return documents
+
+
+def verify(target: str, bundle=None) -> int:
     sys.path.insert(0, target)
-    from gnn import __version__
-    from gnn.parsers.basic import parse_gnn_formal, validate_gnn_syntax
-    from gnn.type_checker import GNNTypeChecker
-
-    pin = load_pin()
-    expected = pin["tag"].removeprefix("v")
-    if __version__ != expected:
-        raise SystemExit(f"gnn: installed {__version__!r} does not match pin tag {pin['tag']!r}")
-
-    sketches = sorted(
-        path for path in ROOT.rglob("*.gnn.md") if ".git" not in path.parts
+    qualification = None
+    guard = (
+        contextlib.nullcontext()
+        if bundle is None
+        else sys.modules[type(bundle).__module__].qualified_install(target, bundle, PIN_PATH)
     )
-    with tempfile.TemporaryDirectory(prefix="gnn-check-") as output_dir:
-        model_dir = Path(output_dir) / "models"
-        model_dir.mkdir()
-        if sketches:
-            sources = sketches
-            source = "repository"
-        else:
-            exemplar = Path(output_dir) / Path(EXEMPLAR).name
-            exemplar.write_bytes(fetch(pin["repository"], pin["revision"], EXEMPLAR))
-            sources = [exemplar]
-            source = "pinned-exemplar"
+    try:
+        with guard as qualification:
+            from gnn import __version__
+            from gnn.parsers.basic import parse_gnn_formal, validate_gnn_syntax
+            from gnn.type_checker import GNNTypeChecker
 
-        for sketch in sources:
-            parsed = parse_gnn_formal(sketch)
-            if parsed is None or getattr(parsed, "parse_errors", None):
-                raise SystemExit(f"gnn: {sketch} did not parse cleanly")
-            valid, errors = validate_gnn_syntax(sketch.read_text(encoding="utf-8"), is_content=True)
-            if not valid:
-                raise SystemExit(f"gnn: {sketch} syntax errors: {errors!r}")
-            shutil.copy2(sketch, model_dir / sketch.name)
+            pin = load_pin()
+            expected = pin["tag"].removeprefix("v")
+            if __version__ != expected:
+                raise SystemExit(f"gnn: installed {__version__!r} does not match pin tag {pin['tag']!r}")
 
-        # True only when every file validates; 2 means invalid files or none
-        # found, False a hard failure. A truthiness test would let 2 pass.
-        outcome = GNNTypeChecker().validate_gnn_files(model_dir, Path(output_dir))
-        if outcome is not True:
-            raise SystemExit(
-                f"gnn: type checker did not pass the {source} document(s) "
-                f"(returned {outcome!r}; expected True)"
-            )
+            sketches = tracked_sketches(ROOT)
+            checked_documents: list[str] = []
+            with tempfile.TemporaryDirectory(prefix="gnn-check-") as output_dir:
+                output = Path(output_dir)
+                if sketches:
+                    sources = sketches
+                    source = "repository"
+                    source_root = ROOT
+                else:
+                    source_root = output / "exemplar"
+                    exemplar = source_root / EXEMPLAR
+                    exemplar.parent.mkdir(parents=True)
+                    exemplar.write_bytes(
+                        bundle.exemplar if bundle is not None
+                        else fetch(pin["repository"], pin["revision"], EXEMPLAR)
+                    )
+                    sources = [exemplar]
+                    source = "pinned-exemplar"
+
+                documents = stage_documents(sources, source_root, output / "models")
+                for index, (identity, sketch) in enumerate(documents):
+                    parsed = parse_gnn_formal(sketch)
+                    if parsed is None or getattr(parsed, "parse_errors", None):
+                        raise SystemExit(f"gnn: {identity} did not parse cleanly")
+                    valid, errors = validate_gnn_syntax(sketch.read_text(encoding="utf-8"), is_content=True)
+                    if not valid:
+                        raise SystemExit(f"gnn: {identity} syntax errors: {errors!r}")
+
+                    # One unchanged basename per directory prevents collisions and does
+                    # not rely on whether this pinned checker recurses into subdirectories.
+                    report_dir = output / "reports" / str(index)
+                    report_dir.mkdir(parents=True)
+                    outcome = GNNTypeChecker().validate_gnn_files(sketch.parent, report_dir)
+                    if outcome is not True:
+                        raise SystemExit(
+                            f"gnn: type checker did not pass {source} document {identity!r} "
+                            f"(returned {outcome!r}; expected True)"
+                        )
+                    checked_documents.append(identity)
+    except ValueError as error:
+        if bundle is None:
+            raise
+        raise SystemExit(f"gnn: offline installed-origin/content qualification: {error}") from error
 
     scope, result = RECEIPTS[source]
-    print(
-        json.dumps(
-            {
-                "gnn-version": __version__,
-                "pin-revision": pin["revision"],
-                "models": len(sources),
-                "scope": scope,
-                "source": source,
-                "result": result,
-            },
-            sort_keys=True,
-        )
-    )
+    receipt = {
+        "gnn-version": __version__,
+        "pin-revision": pin["revision"],
+        "models": len(checked_documents),
+        "documents": checked_documents,
+        "scope": scope,
+        "source": source,
+        "result": result,
+    }
+    if bundle is not None:
+        receipt["offline-resources"] = {
+            "manifest-sha256": bundle.digest,
+            "installed-target": target,
+            "retained-installation": "GITVAULT_EXECUTION_OUTPUT" in os.environ,
+            "source-origin": bundle.manifest["source"]["origin"],
+            "source-tree": bundle.manifest["source"]["tree"],
+            "installed-vcs-url": bundle.source.as_uri(),
+            "installed-vcs-commit": pin["revision"],
+            "runtime": bundle.manifest["runtime"],
+            "installed-versions": {name: item["version"] for name, item in bundle.wheels.items()},
+            "source-qualification": qualification,
+        }
+    # Never emit a successful receipt before the trusted guard's exit rechecks.
+    print(json.dumps(receipt, sort_keys=True))
     return 0
 
 
 def main(argv: list[str]) -> int:
     if argv[:1] == ["--verify"]:
+        if any(name in os.environ for name in ("GNN_OFFLINE_BUNDLE", "GNN_OFFLINE_MANIFEST_SHA256")):
+            raise SystemExit("gnn: offline --verify cannot bypass interpreter selection and fresh installation")
         return verify(argv[1])
 
     pin = load_pin()
+    bundle = offline_resources(pin)
     try:
         requires = REQUIRES_RE.search(
-            fetch(pin["repository"], pin["revision"], "pyproject.toml").decode("utf-8")
+            (
+                bundle.pyproject if bundle is not None
+                else fetch(pin["repository"], pin["revision"], "pyproject.toml")
+            ).decode("utf-8")
         )
-    except OSError:
-        requires = None
-    spec = requires.group(1) if requires else None
+    except OSError as error:
+        raise SystemExit(f"gnn: cannot read pinned requires-python: {error}") from error
+    if requires is None:
+        raise SystemExit("gnn: pinned pyproject.toml has no supported requires-python declaration")
+    spec = requires.group(1)
+    try:
+        parse_requires_python(spec)
+    except ValueError as error:
+        raise SystemExit(f"gnn: {error}") from error
 
-    available = interpreters()
+    available = interpreters(isolated=bundle is not None)
     if not available:
         raise SystemExit("gnn: no usable python3 interpreter on PATH")
     for executable, version in available:
@@ -255,12 +420,44 @@ def main(argv: list[str]) -> int:
         if spec and not satisfies(version, spec):
             print(f"gnn: skipping {executable} ({label}) for requires-python {spec}", file=sys.stderr)
             continue
-        target = tempfile.mkdtemp(prefix="gnn-pin-")
+        if bundle is not None:
+            try:
+                bundle.check_runtime(executable)
+            except ValueError as error:
+                print(f"gnn: skipping {executable} ({label}): {error}", file=sys.stderr)
+                continue
+        retain_target = bundle is not None and "GITVAULT_EXECUTION_OUTPUT" in os.environ
+        output = None
+        if retain_target:
+            output = Path(os.environ["GITVAULT_EXECUTION_OUTPUT"])
+            if not output.is_absolute() or not output.is_dir() or output.is_symlink() or output.resolve() != output:
+                raise SystemExit("gnn: native execution output is not a canonical ordinary directory")
+        target = tempfile.mkdtemp(prefix="gnn-pin-", dir=output)
+        if bundle is not None:
+            target = str(Path(target).resolve())
         try:
-            if not install(executable, target, pin):
+            installed = (
+                install_offline(executable, target, pin, bundle)
+                if bundle is not None else install(executable, target, pin)
+            )
+            if not installed:
                 continue
             print(f"gnn: installed {pin['tag']} with {executable} ({label})", file=sys.stderr)
             environment = dict(os.environ)
+            if bundle is not None:
+                environment.pop("PYTHONPATH", None)
+                environment.pop("PYTHONHOME", None)
+                # This only loads the ORIGINAL verify function in a fresh no-site
+                # child. There is no second verifier or offline --verify shortcut.
+                program = (
+                    "import runpy,sys; checker=runpy.run_path(sys.argv[1]); "
+                    "bundle=checker['offline_resources'](checker['load_pin']()); "
+                    "raise SystemExit(checker['verify'](sys.argv[2],bundle))"
+                )
+                return subprocess.run(
+                    [executable, "-I", "-S", "-B", "-c", program, str(Path(__file__).resolve()), target],
+                    stdin=subprocess.DEVNULL, env=environment, cwd=ROOT,
+                ).returncode
             environment["PYTHONPATH"] = os.pathsep.join(
                 part for part in (target, environment.get("PYTHONPATH")) if part
             )
@@ -270,7 +467,8 @@ def main(argv: list[str]) -> int:
                 cwd=ROOT,
             ).returncode
         finally:
-            shutil.rmtree(target, ignore_errors=True)
+            if not retain_target:
+                shutil.rmtree(target, ignore_errors=True)
 
     detail = spec or "unknown"
     seen = ", ".join(f"{e} ({'.'.join(map(str, v))})" for e, v in available)

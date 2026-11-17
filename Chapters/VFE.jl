@@ -15,7 +15,11 @@ macro bind(def, element)
 end
 
 # ╔═╡ 6c9cdf40-9bec-41af-b91a-8fb1d51a7725
-using PlutoUI, Plots
+begin
+	using PlutoUI, Plots
+	include(joinpath(@__DIR__, "vfe_model.jl"))
+	import .VFEModel
+end
 
 # ╔═╡ eef8d8e0-fe99-11ec-1f32-a503a0e87c44
 md"# Variational Free Energy Simulator"
@@ -39,39 +43,33 @@ likelihood = [l 1-l; 1-l l]
 
 # ╔═╡ 1580975e-d503-43e0-9255-a0745136d2be
 begin
-	# Exact Bayesian inference for a binary hidden state x given the observation.
-	observation = [1, 0]                                       # one-hot encoding of observed y (y = 1)
-	likelihood_of_observation = likelihood * observation        # P(y = 1 | x), length-2 column
-	joint_probability = vec(prior) .* vec(likelihood_of_observation)  # P(x, y), elementwise
-	marginal_probability = sum(joint_probability)               # P(y)
-	posterior = joint_probability / marginal_probability        # P(x | y)
-	md"Exact posterior: $(posterior[1])=P(x=1|y), $(posterior[2])=P(x=2|y)"
+	inference = VFEModel.infer_observation(prior, likelihood)
+	joint_probability = inference.joint_probability
+	marginal_probability = inference.marginal_probability
+	posterior = inference.posterior
+	if posterior === nothing
+		md"Impossible observation: P(y=1)=0. No exact posterior exists for these slider settings."
+	else
+		md"Exact posterior: $(posterior[1])=P(x=1|y), $(posterior[2])=P(x=2|y)"
+	end
 end
 
 # ╔═╡ d3084411-e7a0-4413-8cd0-8fee5fc712e5
 s
 
 # ╔═╡ 57ace93e-ea63-46b7-bf74-f277f94f254a
-begin
-	# x * log(x / y) with the 0 * log(0) = 0 convention (handles boundary supports).
-	function xlogy(x, y)
-		x <= 0 ? zero(x) : x * log(x / y)
-	end
-
-	# Variational free energy F(q) as a function of the variational posterior q = Q(x = 1):
-	#   F(q) = KL[Q(x) || P(x | y)] - log P(y)
-	#        = q*log(q/p1) + (1-q)*log((1-q)/p2) - log P(y),
-	# which is minimized at q = P(x = 1 | y) = posterior[1].
-	function vfe(q)
-		xlogy(q, posterior[1]) + xlogy(1 - q, posterior[2]) - log(marginal_probability)
-	end
-end
+# The notebook and regression suite use the same pure computation.
+vfe(q) = VFEModel.vfe(q, joint_probability)
 
 # ╔═╡ 7e970dfd-765c-4a30-a1f7-4b4e3d8d17a3
 begin
 	initial_approximate_posterior = prior
 	initial_vfe = vfe(prior[1])
-	Markdown.parse("Variational free energy at the prior: \$F = $initial_vfe\$ (the exact-posterior free energy is \$F = $(vfe(posterior[1]))\$)")
+	if posterior === nothing
+		md"Variational free energy is infinite for every q because the observation has zero probability. There is no posterior or finite optimum to display."
+	else
+		Markdown.parse("Variational free energy at the prior: \$F = $initial_vfe\$ (the exact-posterior free energy is \$F = $(vfe(posterior[1]))\$)")
+	end
 end
 
 # ╔═╡ c35395bb-fea2-417d-8341-7bf540ab1e44
@@ -79,10 +77,18 @@ plotly()
 
 # ╔═╡ 5fd822c7-902e-46c9-a088-d54e198e507d
 begin
-	qs = 0.0:0.001:1.0
-	p = plot(qs, vfe.(qs), label = "VFE F(q)", xlabel = "q = Q(x=1)", ylabel = "Variational free energy", title = "Variational Free Energy Simulator", legend = :top)
-	vline!([posterior[1]], label = "exact posterior q* = $(posterior[1])", linestyle = :dash)
-	p
+	if posterior === nothing
+		md"No posterior or free-energy curve is plotted for an impossible observation. Change either slider to give the observation positive probability."
+	else
+		qs = 0.0:0.001:1.0
+		vfe_values = vfe.(qs)
+		finite_vfe = isfinite.(vfe_values)
+		all_finite = all(finite_vfe)
+		plot_title = all_finite ? "Variational Free Energy Simulator" : "VFE (infinite values outside model support omitted)"
+		p = plot(qs[finite_vfe], vfe_values[finite_vfe], label = "finite VFE F(q)", xlabel = "q = Q(x=1)", ylabel = "Variational free energy", title = plot_title, legend = :top, marker = all_finite ? :none : :circle)
+		vline!([posterior[1]], label = "exact posterior q* = $(posterior[1])", linestyle = :dash)
+		p
+	end
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -292,14 +298,8 @@ version = "0.64.4"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Pkg", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "3a233eeeb2ca45842fe100e0413936834215abf5"
-uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.64.4+0"
 
-[[deps.GeometryBasics]]
-deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
-git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"
-uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
+[Showing lines 1-300 of 1059. Use :301 to continue]
 version = "0.4.2"
 
 [[deps.Gettext_jll]]

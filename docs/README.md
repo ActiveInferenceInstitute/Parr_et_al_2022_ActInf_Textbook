@@ -17,25 +17,25 @@ every long-lived document, kept current by the `docs` gate.
 | [Validation](validation.md) | The `./run.sh` arms, what each proves, and the CI jobs that call them. |
 | [Gate measurements](_generated/GATES.md) | Generated: per-arm wall time and gate facts (`./run.sh report`). |
 | [Plaintext content](plaintext-content.md) | How `TextbookContent/PlainText/` is laid out, how it is generated, and its integrity invariant. |
-| [Chapters](chapters.md) | The reading group's computational notes: `VFE.jl`, `test_vfe.jl`, and `03_blanket.ipynb`. |
+| [Chapters](chapters.md) | Computational notes, shared `vfe_model.jl`, regression boundaries and interactive acceptance. |
 
 ## Running the gates
 
 ```bash
 ./run.sh --list   # every arm and its exact command
 ./run.sh fast     # lint + tests + plaintext + docs
-./run.sh full     # every arm
+COURSES_ROOT=/absolute/path/to/qualified/courses ./run.sh full
 ```
 
 ## Status
 
 Working materials, not a published product:
 
-- The **plaintext extractions** and the **VFE simulator** regenerate from the
-  PDF of record and run offline today; every offline arm passes (see
-  [validation.md](validation.md)).
-- The **Pluto notebook is interactive** and is not executed in CI; open it with
-  a local Julia + Pluto install.
+- Bounded cleaner, Markdown, GNN-protocol and real education-consumer controls
+  passed locally, as did the shared Julia model. This is not a fresh full-gate run.
+- The plaintext corpus and generated measurements were not regenerated.
+- Pluto visual acceptance remains outstanding: the prepared Julia runtime does
+  not contain Pluto. No package installation or notebook-in-CI change is implied.
 - The repository deliberately has **no documentation site** (see
   [`../TODO.md`](../TODO.md) J1). This `docs/` tree is plain Markdown.
 
