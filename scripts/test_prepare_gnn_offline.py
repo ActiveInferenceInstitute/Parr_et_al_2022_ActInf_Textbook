@@ -196,6 +196,8 @@ class PreparedInstallerTests(unittest.TestCase):
                     os.environ[name] = value
         self.assertEqual(len(observed), 1, "expected the real authenticated pip installation launch")
         self.assertEqual(observed[0]["PIP_CONFIG_FILE"], os.devnull)
+        for name in ("PIP_PYTHON", "PIP_TARGET", "PIP_PREFIX"):
+            self.assertNotIn(name, observed[0], f"setup inherited a delegation selector: {name}")
         bindings = ("PIP_CACHE_DIR", "UV_CACHE_DIR", "TMPDIR", "TEMP", "UV_LINK_MODE")
         for name in bindings:
             self.assertIn(name, os.environ, "native setup controls require declared installer bindings")

@@ -47,6 +47,10 @@ def digest(path: Path) -> str:
 
 def run(argv: list[str], *, cwd: Path | None = None) -> str:
     environment = dict(os.environ, PIP_CONFIG_FILE=os.devnull)
+    # pip's initial interpreter selection precedes command-specific --isolated.
+    # Bind interpreter/destination only through our authenticated, explicit argv.
+    for name in ("PIP_PYTHON", "PIP_TARGET", "PIP_PREFIX"):
+        environment.pop(name, None)
     result = subprocess.run(argv, cwd=cwd, env=environment, stdin=subprocess.DEVNULL,
                             text=True, capture_output=True, check=False, timeout=900)
     if result.returncode:

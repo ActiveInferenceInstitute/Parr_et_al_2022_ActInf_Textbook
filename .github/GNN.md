@@ -158,9 +158,12 @@ and authenticates the real registry-bound bootstrap pip wheel before any pip
 execution, and uses the same authenticated loader for download, setup and sealing.
 Unexpected bytecode is not exempt from the installer inventory: a bare `.pyc`
 can override a standard-library module even with a fresh bytecode search root.
-Setup and bootstrap disable pip configuration files before invoking isolated pip,
-preventing configuration-driven interpreter or destination delegation. The
-original installer preserves the caller's declared task-owned `PIP_CACHE_DIR`
+Setup and bootstrap disable pip configuration files before invoking isolated pip.
+Setup also removes only the interpreter/destination selectors `PIP_PYTHON`,
+`PIP_TARGET` and `PIP_PREFIX` before launch: pip's initial interpreter selection
+can precede its command-specific `--isolated` policy. Interpreter and destination
+are bound by authenticated, explicit command arguments instead. The original
+installer and setup preserve the caller's declared task-owned `PIP_CACHE_DIR`
 alongside the native cache, temporary-directory and guard bindings.
 
 The stdlib-only helper API is `scripts.gnn_offline.load_bundle(directory,
