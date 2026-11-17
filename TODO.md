@@ -1,6 +1,6 @@
 # Documentation TODO — Parr et al. 2022 Active Inference Textbook
 
-**Last reviewed:** 2026-11-12
+**Last reviewed:** 2026-11-16
 
 This backlog records the 2026-08-02 documentation-deep review. Minor means a
 small correction such as a typo, broken link, or formatting issue. Medium means
@@ -91,6 +91,26 @@ cross-cutting refactor.
   plain Markdown. A hosted documentation site would still add maintenance
   without a verified need.
 
+## Bounded qualification — 2026-11-13
+
+- [x] **T1 — Conservative cleaner.** Ambiguous mathematical lines, retained
+  character order, report-only preservation and explicit-file apply controls
+  passed. The observed unclosed-read warning was repaired; no corpus regeneration.
+- [ ] **T2 — Shared VFE model and interactive acceptance.** Shared Julia boundary
+  tests passed, including impossible observations. Pluto is absent from the
+  prepared runtime; actual notebook rendering remains outstanding.
+- [x] **T3 — GNN admission controls.** Tracked-file identity, duplicate basenames,
+  fail-closed verdicts and numeric interpreter constraints passed protocol tests.
+  These do not replace real pinned-upstream/installed-runtime qualification.
+- [x] **T4 — Markdown destinations.** Real-file and parser controls passed;
+  remote links, fragments and full-renderer equivalence are not claimed.
+- [x] **T5 — Actual education consumer.** Explicit-root producer controls and the
+  actual member CLI passed with adopted state and no issues. No validator fork,
+  sibling-layout inference or installed fallback. Hosted producer delivery remains open.
+
+M1–M14 above remain dated history. No generated measurements or release evidence
+were renewed by this focused qualification.
+
 ## Open / deferred
 
 - J1 remains deferred for the reason above: `docs/` is plain Markdown and
@@ -102,32 +122,33 @@ cross-cutting refactor.
   an interactive Pluto.jl notebook and a specification would remove the
   interactivity the reading group uses. See `REVIEW_LOG_2026-11-01.md`. Do not
   convert it without a request that asks for exactly that.
-- No hosted run is evidence: GitHub Actions is billing-locked for the
-  organisation, so every gate result here comes from a local run on the host
-  named in [`docs/_generated/GATES.md`](docs/_generated/GATES.md).
-- The GNN pin moved to `v5.1.0` on 2026-11-16: `.github/gnn-pin.json` records
-  `v5.1.0` at `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf` (the commit the
-  annotated tag resolves to), keeping this repository's `OWNER/REPO`
-  `repository` and `revision` keys, so `scripts/check_gnn_conformance.py` reads
-  it unchanged. The arm still verifies no `parser_files` digest; adding one is a
-  separate, unrequested change. Locally the arm's `--verify` path passed against
-  a 5.1.0 parser built from that commit; the network install path is proved by
-  the hosted `gnn conformance (pinned)` job. `docs/validation.md` still quotes
-  `v5.0.3` in its GNN conformance paragraph; that paragraph is rewritten by the
-  open validation-docs integration (PR #15), so it is left for that change.
+- Hosted evidence is bound to an actual immutable head: the original software
+  candidate `de129d861325f1c80bebd4148a91b9657b380376` in
+  [PR #15](https://github.com/ActiveInferenceInstitute/Parr_et_al_2022_ActInf_Textbook/pull/15)
+  passed all six named hosted checks on 2026-11-16, including pinned GNN,
+  Python arms and VFE. Earlier billing negatives remain historical evidence;
+  neither they nor that success decide later heads or Pluto visual acceptance.
+- Main [PR #16](https://github.com/ActiveInferenceInstitute/Parr_et_al_2022_ActInf_Textbook/pull/16)
+  moved the importer to `v5.1.0` at
+  `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`, preserving its `OWNER/REPO`
+  and `revision` schema. This continuation retains that published owner decision.
+  The original `e323329` source's full fresh-install `v5.0.3` baseline passed;
+  its receipt retains the original pin and does not qualify the new pin or head.
+  Current offline resources must match the independent `v5.1.0` manifest and
+  complete installable source; qualification still executes the original fresh
+  VCS installation and parse/syntax/type checks. No package-only source guard,
+  prior installed parser or older hosted result substitutes for that arm.
 - The education bundle's glossary is empty, and the lead checker reports
   `0 term(s)`: `specs/education/parr-2022.json` carries no controlled
   vocabulary, which `README.md` records as a deliberate limit of this
   migration. It does not block bundle emission; authoring terms is curriculum
   work owned by the `courses` content authors.
-- No arm validates the bundle. `./run.sh lint` only parses JSON, and the check
-  that does validate `specs/education/parr-2022.json` against
-  `specs/education/schema.json` is
-  `../courses/software/scripts/check_education_contract.py`, which needs a
-  sibling `courses` checkout and so cannot be a hermetic arm. Owner: repository
-  maintainers; unblocked, but it needs either a vendored validator or an
-  explicitly non-hermetic arm.
+- The education arm now validates this actual member through an explicitly
+  selected qualified `COURSES_ROOT`; its real consumer proof passed locally.
+  CI delivery of that qualified producer remains operationally unqualified.
 - `inferactively-pymdp` has nothing to pin here: the repository ships no
   `requirements.txt`, `pyproject.toml`, or `setup.py`, and every script under
   `scripts/` imports only the standard library.
-- No other findings are intentionally left open after this pass.
+- Keep J1 and TD1–TD8 boundaries: no types/style arm, GNN conversion,
+  notebook-in-CI change, hosted billing claim, unrequested pin migration,
+  glossary invention, pymdp dependency or corpus regeneration.

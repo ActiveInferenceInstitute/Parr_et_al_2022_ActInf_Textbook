@@ -38,14 +38,19 @@ TextbookContent/PlainText/          — cleaned plaintext of the textbook:
 Chapters/
   README.md                          — folder guide for the computational notes
   VFE.jl                             — Pluto.jl notebook: Variational Free Energy Simulator
+  vfe_model.jl                       — shared VFEModel used by the notebook and tests
   test_vfe.jl                        — Julia regression tests for the VFE simulator
   03_blanket.ipynb                   — Chapter 3 (The High Road) Jupyter notes
 docs/                                — repository documentation (hub: docs/README.md,
                                        flat index: docs/documentation-index.md)
 scripts/
   clean_plaintext.py                 — reproducible PlainText cleaning pipeline
+  test_clean_plaintext.py            — conservative cleaner regressions
   lint_sources.py                    — `./run.sh lint` arm: Python compiles, JSON parses
   check_docs.py                      — `./run.sh docs` arm: relative links and docs index
+  test_check_docs.py                 — Markdown destination and real-file regressions
+  check_education.py                 — explicit-root courses producer adapter
+  test_check_education.py            — admission and real producer/member controls
   check_gnn_conformance.py           — `./run.sh gnn` arm: pinned GNN parser conformance
   test_check_gnn_conformance.py      — `./run.sh tests` arm: unit tests for the GNN arm's fail-closed type check and receipt labels
   gate_report.py                     — `./run.sh report` arm: writes docs/_generated/GATES.md
@@ -61,9 +66,9 @@ REVIEW_LOG_<date>.md                 — dated documentation review logs (2026-0
 ```
 
 The plaintext chapters are cleaned with `scripts/clean_plaintext.py` (MIT-Press
-download footers and isolated page-number lines removed, long prose lines wrapped;
-standalone equation/header lines are preserved). To regenerate them from the raw
-extraction, re-extract from the PDF and run `python3 scripts/clean_plaintext.py --apply`
+download footers and explicitly labelled `Page N` / `Page N of M` lines removed,
+long prose lines wrapped; ambiguous bare numbers and Roman numerals are retained).
+To regenerate, re-extract from the PDF and run `python3 scripts/clean_plaintext.py --apply`
 (the default invocation is report-only; `--apply` writes the cleaned files in place).
 
 ## Running the computational notebooks
@@ -71,9 +76,9 @@ extraction, re-extract from the PDF and run `python3 scripts/clean_plaintext.py 
 - `Chapters/VFE.jl` is a [Pluto.jl](https://plutojl.org) notebook. Open it with
   `julia -e 'using Pluto; Pluto.run()'` and load the file. Dependencies are pinned
   in the notebook's embedded manifest (Julia 1.7.3).
-- Verify the simulator's math with `./run.sh vfe` (`julia Chapters/test_vfe.jl`,
-  which asserts the free energy is minimised at the exact posterior across the
-  slider range).
+- Verify the shared `VFEModel` with `./run.sh vfe`. Supported observations have
+  normalized posteriors; impossible observations have no posterior and infinite
+  free energy. Headless mathematics does not certify the Pluto surface.
 - `Chapters/03_blanket.ipynb` is a standard Jupyter notebook (Python 3 kernel), using
   only the standard library. Open with `jupyter notebook Chapters/03_blanket.ipynb`.
 
@@ -83,15 +88,65 @@ arms (`.github/workflows/ci.yml`):
 ```bash
 ./run.sh --list   # every arm and its exact command
 ./run.sh fast     # lint + tests + plaintext + docs
-./run.sh full     # every arm, including the Julia suite and the GNN pin
+COURSES_ROOT=/absolute/path/to/qualified/courses ./run.sh full
 ```
 
-`plaintext` checks the integrity invariant, `tests` runs the GNN conformance
-script's unit tests, `vfe` runs the simulator's mathematics, `gnn` checks the
-pinned GNN conformance baseline (see `.github/GNN.md`). Arm details are in
+`plaintext` checks the integrity invariant; `tests` runs hermetic cleaner, GNN
+protocol, Markdown and education-admission controls. `education` requires the
+explicit qualified producer and checks this actual checkout; `vfe` tests the shared
+model. `gnn` retains its separately provisioned pinned baseline (see `.github/GNN.md`).
+The original 2026-11-13 bounded qualification did not run a full gate, install GNN,
+regenerate the corpus or certify Pluto; the prepared Julia runtime has no Pluto.
+Arm details are in
 [`docs/validation.md`](docs/validation.md); measured wall times are in
 [`docs/_generated/GATES.md`](docs/_generated/GATES.md). The Pluto notebook
 itself is interactive and is not executed in CI.
+
+### Preparing the original GNN arm for offline admission
+
+The online default remains the original pinned acquisition and installation.
+For offline native test admission, first acquire the exact pinned **installable
+Git checkout** under authorized setup admission, retain genuine origin/admission
+evidence, and inspect its immutable packaging hooks. A package-only source export
+or an already installed parser is not a substitute. Create a new CPython 3.12
+installer environment under `.gnn-env/`; never replace a shared or source-bound
+runtime. Then prepare the complete declared runtime/build wheel closure:
+
+```bash
+python3 -I -S -B scripts/prepare_gnn_offline.py \
+  --bundle "$GNN_ACQUISITION_ROOT" --source "$GNN_SOURCE_ROOT" \
+  --python "$GNN_SETUP_PYTHON" --admission "$GNN_ACQUISITION_RECEIPT" \
+  --identity "$GNN_IDENTITY_RECEIPT" --package-manifest "$GNN_SOURCE_MANIFEST" \
+  --bootstrap "$GNN_BOOTSTRAP"
+```
+
+Setup acquires actual registry-advertised wheels and preserves their hashes,
+the independently trusted source inventory for the current pin and reviewed bootstrap.
+It inspects the installer with no-site startup, reads metadata as data and
+authenticates pip against its actual registry-advertised wheel before executing
+its genuine CLI. Unexpected startup or bytecode files and incomplete acquisition
+receipts fail. Setup disables pip configuration files and uses isolated pip
+options so caller configuration cannot redirect its interpreter or destination.
+Its printed digest is only a candidate for **independent source/resource review**, not
+self-issued acceptance. If a diagnosed setup completed acquisition and installer
+preparation but stopped before freezing, explicit `--seal-prepared` validates the
+retained exact records without repeating network or installation; changed or
+missing resources fail rather than being overwritten. After independent review
+freezes the expected digest, run the same original arm through native offline
+test admission:
+
+```bash
+GNN_OFFLINE_BUNDLE="$GNN_ACQUISITION_ROOT" \
+GNN_OFFLINE_MANIFEST_SHA256="$GNN_REVIEWED_MANIFEST_SHA256" ./run.sh gnn
+```
+
+The arm still checks `requires-python`, installs into a fresh target from the
+genuine pinned local Git source with isolated build and all locked dependencies,
+and performs its original parse, syntax and literal-`True` type checks. Missing,
+changed or wrong-origin resources fail; no installed-package fallback is used.
+See [the bundle protocol](.github/GNN.md) for exact inputs and scope. This path
+does not execute scientific notebooks, regenerate content or accept Pluto's UI.
+
 
 ## Education contract
 
@@ -124,18 +179,21 @@ The bundle's provenance revision identifies the source material transcribed.
   generative-models chapter. No notebook ordering or hard dependency is invented.
 - The glossary is empty; this migration does not author a new term corpus.
 
-With the lead checkout beside this repository, run its checker directly (no
-lead environment synchronization or timing-file writes):
+Select the qualified lead checkout explicitly; no sibling layout, installed
+package fallback, symlink arrangement, synchronization or local validator is used:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python3 ../courses/software/scripts/check_education_contract.py specs/education/parr-2022.json
-PYTHONDONTWRITEBYTECODE=1 python3 ../courses/software/scripts/check_education_contract.py
-./run.sh docs vfe
+COURSES_ROOT=/absolute/path/to/qualified/courses ./run.sh education
 ```
 
-The first command validates this bundle; the second checks schema-copy integrity
-and adoption across the registry. Other members' pending or diverged states are
-not repaired here. The member's existing gate arms remain unchanged.
+The adapter loads the actual producer's registry and calls
+`check_member(None, spec, canonical_schema=..., repo_root=member_checkout)`.
+It checks the authentic member identity, pointer, byte-identical schema, every
+declared bundle, containment and producer semantic rules. Missing, malformed,
+pending or invalid members fail rather than skip. Its JSON receipt names both
+source roots, declared bundles, adoption state and issues. The actual member
+passed with `state=adopted`, `ok=true` and no issues in bounded local qualification.
+Other members and the deliberately empty glossary are not authored here.
 
 ## Related resources
 
@@ -169,9 +227,9 @@ book's derivations.
 ## Provenance and citation
 
 - **Source text:** the plaintext files were extracted from the open-access textbook
-  PDF and cleaned with `scripts/clean_plaintext.py` (download footers and isolated
-  page numbers removed; equation lines preserved). The cleaning is reproducible from
-  the PDF source of record.
+  PDF and cleaned with the historical cleaner. The current conservative cleaner
+  removes only recognized footers and explicit pagination; no corpus regeneration
+  was performed during its qualification.
 - **License:** this repository is released under CC-BY-4.0 (see `LICENSE`).
   The underlying textbook is published open access by MIT Press; consult the PDF for
   the book's own terms.

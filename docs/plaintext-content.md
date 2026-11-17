@@ -21,9 +21,12 @@ records the current count and per-arm wall time.
 ## How they are generated
 
 [`../scripts/clean_plaintext.py`](../scripts/clean_plaintext.py) is the
-deterministic cleaner. It removes three classes of PDF-extraction noise —
-MIT Press download footers, isolated page-number lines, and very long unwrapped
-prose lines — while preserving standalone equation and header lines.
+deterministic cleaner. It removes recognized MIT Press download footers and
+explicit positive-decimal `Page N` / `Page N of M` lines, and wraps long prose.
+Bare integers, Roman numerals (`x`, `i`, `iv`), mixed notation and ordinary page
+mentions are retained because they may be mathematical content.
+If wrapping would create a standalone pagination label or download footer, the
+original line stays unwrapped so a later cleaning pass cannot remove prose.
 
 ```bash
 python3 scripts/clean_plaintext.py           # report only, no writes (default)
@@ -41,6 +44,12 @@ for characters belonging to the footer/page-number lines it removes. Its report
 prints, for every file, the observed and expected counts and asserts they match;
 `./run.sh plaintext` (and the CI job of the same arm) runs the report-only
 invocation as a gate (see [validation.md](validation.md)).
+
+The count is a mechanical invariant, not a proof of mathematical fidelity:
+approved removals must still be conservative. Regression fixtures exercise
+ambiguous mathematical lines, retained character order, idempotence and
+report-only byte preservation. The existing corpus was not regenerated during
+the cleaner's bounded qualification.
 
 ## Why there is no `README.md` inside `TextbookContent/`
 

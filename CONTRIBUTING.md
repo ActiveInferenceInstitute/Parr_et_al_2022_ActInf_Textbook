@@ -24,16 +24,18 @@ Run the checks relevant to your change:
 ```bash
 ./run.sh --list   # every arm and its exact command
 ./run.sh fast     # lint + tests + plaintext + docs
-./run.sh full     # every arm (adds the Julia suite and the GNN pin)
+COURSES_ROOT=/absolute/path/to/qualified/courses ./run.sh full
 ```
 
-CI calls the same arms, so a green `./run.sh full` is the local equivalent of a
-green workflow. `docs/validation.md` explains each arm.
+The education arm needs the actual qualified courses source and is excluded from
+hermetic `fast`. CI does not yet deliver that producer; local bounded evidence
+is not a green hosted workflow or full-gate result. See [validation](docs/validation.md).
 
 The cleaner's default mode reports its integrity checks without writing files.
 Use `python3 scripts/clean_plaintext.py --apply` only when regenerating the
-cleaned plaintext files. The Julia test exercises the binary variational free
-energy model without requiring Pluto.
+cleaned plaintext files; ambiguous bare page numbers remain content. No corpus
+regeneration was part of bounded qualification. The Julia suite uses the same
+`vfe_model.jl` as the notebook; Pluto visual acceptance remains separate.
 
 For `Chapters/03_blanket.ipynb`, execute its three code cells in a Python 3
 kernel and confirm that the assertions pass. The notebook uses only Python's
