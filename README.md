@@ -124,7 +124,9 @@ Setup acquires actual registry-advertised wheels and preserves their hashes,
 the independently trusted source inventory for the current pin and reviewed bootstrap.
 It inspects the installer with no-site startup, reads metadata as data and
 authenticates pip against its actual registry-advertised wheel before executing
-its genuine CLI. `.pth`/`sitecustomize` and incomplete acquisition receipts fail.
+its genuine CLI. Unexpected startup or bytecode files and incomplete acquisition
+receipts fail. Setup disables pip configuration files and uses isolated pip
+options so caller configuration cannot redirect its interpreter or destination.
 Its printed digest is only a candidate for **independent source/resource review**, not
 self-issued acceptance. If a diagnosed setup completed acquisition and installer
 preparation but stopped before freezing, explicit `--seal-prepared` validates the

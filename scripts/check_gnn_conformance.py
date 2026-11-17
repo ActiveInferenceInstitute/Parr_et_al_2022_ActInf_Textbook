@@ -193,7 +193,8 @@ def install_offline(executable: str, target: str, pin: dict, bundle) -> bool:
             raise ValueError("offline installation requires a new empty canonical target")
         environment = {
             key: value for key, value in helper.git_environment().items()
-            if not key.startswith("PIP_") and key not in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP")
+            if (not key.startswith("PIP_") or key == "PIP_CACHE_DIR")
+            and key not in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP")
         }
         environment.update(
             PIP_CONFIG_FILE=os.devnull, PIP_NO_INDEX="1", PIP_FIND_LINKS=str(bundle.wheelhouse),

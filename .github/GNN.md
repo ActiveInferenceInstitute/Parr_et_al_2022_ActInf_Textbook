@@ -156,6 +156,12 @@ with a fresh bytecode search root, not ambient `.pth`, packages or cached code.
 Setup also uses no-site inspection and data-only pip metadata reads. It acquires
 and authenticates the real registry-bound bootstrap pip wheel before any pip
 execution, and uses the same authenticated loader for download, setup and sealing.
+Unexpected bytecode is not exempt from the installer inventory: a bare `.pyc`
+can override a standard-library module even with a fresh bytecode search root.
+Setup and bootstrap disable pip configuration files before invoking isolated pip,
+preventing configuration-driven interpreter or destination delegation. The
+original installer preserves the caller's declared task-owned `PIP_CACHE_DIR`
+alongside the native cache, temporary-directory and guard bindings.
 
 The stdlib-only helper API is `scripts.gnn_offline.load_bundle(directory,
 expected_sha256, pin) -> Bundle`, `from_environment(pin) -> Bundle | None`,

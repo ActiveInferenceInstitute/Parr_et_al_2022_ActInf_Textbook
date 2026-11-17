@@ -298,5 +298,30 @@ def main(root: Path = ROOT) -> int:
         }
     covered = {
         path
+        for path in docs.rglob("*.md")
+        if generated not in path.parents and path != index
+    }
+    for path in sorted(covered - linked):
+        failures.append(
+            f"{path.relative_to(root)}: not listed in docs/documentation-index.md"
+        )
 
-[Showing lines 1-300 of 327. Use :301 to continue]
+    hub_targets = {
+        Path(os.path.normpath(os.path.join(hub.parent, target)))
+        for _, raw in link_targets(hub)
+        if (target := relative_target(raw)) is not None
+    }
+    if index not in hub_targets:
+        failures.append("docs/README.md does not link docs/documentation-index.md")
+
+    for failure in failures:
+        print(failure, file=sys.stderr)
+    print(
+        f"docs: {len(files)} Markdown file(s), {checked} relative link(s), "
+        f"{len(covered)} docs page(s) indexed, {len(failures)} failure(s)."
+    )
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

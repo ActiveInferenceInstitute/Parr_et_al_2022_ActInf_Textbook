@@ -211,6 +211,17 @@ class PreparedResourceTests(unittest.TestCase):
             with self.assertRaisesRegex(offline.OfflineError, "native acquisition evidence is incomplete or failed"):
                 offline._check_source(root, record, PIN)
 
+    def test_omitted_acquisition_result_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="gnn-acquisition-omitted-control-") as directory:
+            root = Path(directory).resolve()
+            record, _ = self.copy_source(root)
+            receipt = root / record["acquisition"]["admission"]
+            evidence = json.loads(receipt.read_text(encoding="utf-8"))
+            del evidence["result"]
+            receipt.write_text(json.dumps(evidence), encoding="utf-8")
+            with self.assertRaisesRegex(offline.OfflineError, "native acquisition evidence is incomplete or failed"):
+                offline._check_source(root, record, PIN)
+
     def test_late_acquisition_error_with_complete_fields_is_rejected(self):
         with tempfile.TemporaryDirectory(prefix="gnn-acquisition-error-control-") as directory:
             root = Path(directory).resolve()
@@ -298,6 +309,15 @@ class InstalledOriginTests(unittest.TestCase):
         offline.validate_vcs_origin(root, self.bundle, distribution)
         return distribution, destination / "direct_url.json"
 
+    def test_absent_installed_pep610_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="gnn-installed-missing-origin-control-") as directory:
+            root = Path(directory).resolve()
+            distribution, direct_url = self.copy_install(root)
+            direct_url.unlink()
+            with self.assertRaisesRegex(offline.OfflineError, "no genuine PEP 610 VCS metadata"):
+                offline.validate_vcs_origin(root, self.bundle, distribution)
+
+
     def test_installed_pep610_url_mismatch_is_rejected(self):
         with tempfile.TemporaryDirectory(prefix="gnn-installed-url-control-") as directory:
             root = Path(directory).resolve()
@@ -333,6 +353,52 @@ class InstalledOriginTests(unittest.TestCase):
             module.symlink_to(self.target / "gnn" / "__init__.py")
             with self.assertRaisesRegex(offline.OfflineError, "symlink"):
                 offline.validate_vcs_origin(root, self.bundle, distribution)
+
+
+    def guard_child(self, scenario: str, external: Path | None = None):
+        executable = str(Path(self.bundle.manifest["installer"]["prefix"]) / "bin" / "python")
+        program = """
+import runpy
+import sys
+from pathlib import Path
+namespace = runpy.run_path(sys.argv[1])
+bundle = namespace["load_bundle"](sys.argv[2], sys.argv[3], namespace["_json"](Path(sys.argv[4]).read_bytes(), "pin"))
+target = Path(sys.argv[5])
+sys.path.insert(0, str(target))
+if sys.argv[6] == "preimport":
+    import gnn
+    with namespace["qualified_install"](str(target), bundle, Path(sys.argv[4])):
+        pass
+else:
+    with namespace["qualified_install"](str(target), bundle, Path(sys.argv[4])):
+        from gnn import __version__
+        from gnn.parsers.basic import parse_gnn_formal, validate_gnn_syntax
+        from gnn.type_checker import GNNTypeChecker
+        sys.path.insert(0, sys.argv[7])
+        import textbook_external_control
+print("unexpected guard success")
+"""
+        return subprocess.run(
+            [executable, "-I", "-S", "-B", "-c", program, str(Path(offline.__file__)),
+             str(self.bundle.root), self.bundle.digest, str(ROOT / ".github" / "gnn-pin.json"),
+             str(self.target), scenario, str(external or "")],
+            stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        )
+
+    def test_real_preimported_gnn_is_rejected_by_guard(self):
+        completed = self.guard_child("preimport")
+        self.assertNotEqual(completed.returncode, 0)
+        self.assertIn("must start before any GNN import", completed.stderr)
+        self.assertNotIn("unexpected guard success", completed.stdout)
+
+    def test_real_external_module_is_rejected_on_guard_exit(self):
+        with tempfile.TemporaryDirectory(prefix="gnn-external-module-control-") as directory:
+            root = Path(directory).resolve()
+            (root / "textbook_external_control.py").write_text("CONTROL = 'real external fixture'\n", encoding="utf-8")
+            completed = self.guard_child("escape", root)
+            self.assertNotEqual(completed.returncode, 0)
+            self.assertIn("imported module escaped the isolated target/stdlib: textbook_external_control", completed.stderr)
+            self.assertNotIn("unexpected guard success", completed.stdout)
 
 
 if __name__ == "__main__":

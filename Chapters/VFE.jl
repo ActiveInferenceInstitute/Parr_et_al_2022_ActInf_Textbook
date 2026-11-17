@@ -298,8 +298,14 @@ version = "0.64.4"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Pkg", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
+git-tree-sha1 = "3a233eeeb2ca45842fe100e0413936834215abf5"
+uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
+version = "0.64.4+0"
 
-[Showing lines 1-300 of 1059. Use :301 to continue]
+[[deps.GeometryBasics]]
+deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
+git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"
+uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 version = "0.4.2"
 
 [[deps.Gettext_jll]]

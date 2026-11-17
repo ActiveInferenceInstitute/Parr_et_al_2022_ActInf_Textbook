@@ -536,10 +536,7 @@ def installer_command(
     if sha256_file(wheel) != _digest(pip_wheel["sha256"], "wheel SHA-256"):
         _fail(f"wheel digest differs: {wheel.name}")
     bound_files = _installed_wheel_content(library, root, pip_wheel)
-    actual_library = {
-        library / relative for relative in _inventory(library, hashes=False)
-        if "__pycache__" not in PurePosixPath(relative).parts and not relative.endswith((".pyc", ".pyo"))
-    }
+    actual_library = {library / relative for relative in _inventory(library, hashes=False)}
     generated_metadata = {
         path.parent / name
         for path in bound_files if path.name == "METADATA" and path.parent.name.endswith(".dist-info")
@@ -547,10 +544,7 @@ def installer_command(
     }
     if not actual_library.issubset(bound_files | generated_metadata):
         _fail("installer search root contains files outside its locked pip distribution")
-    pip_files = {
-        library / "pip" / relative for relative in _inventory(library / "pip", hashes=False)
-        if "__pycache__" not in PurePosixPath(relative).parts and not relative.endswith((".pyc", ".pyo"))
-    }
+    pip_files = {library / "pip" / relative for relative in _inventory(library / "pip", hashes=False)}
     if pip_files != {path for path in bound_files if path.is_relative_to(library / "pip")}:
         _fail("installer pip contains code outside its externally locked wheel")
     metadata = list(importlib.metadata.distributions(path=[str(library)]))

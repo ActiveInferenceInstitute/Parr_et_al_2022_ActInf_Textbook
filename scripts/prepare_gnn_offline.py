@@ -46,7 +46,8 @@ def digest(path: Path) -> str:
 
 
 def run(argv: list[str], *, cwd: Path | None = None) -> str:
-    result = subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL,
+    environment = dict(os.environ, PIP_CONFIG_FILE=os.devnull)
+    result = subprocess.run(argv, cwd=cwd, env=environment, stdin=subprocess.DEVNULL,
                             text=True, capture_output=True, check=False, timeout=900)
     if result.returncode:
         raise RuntimeError(f"setup command failed ({result.returncode}): {argv!r}\n"
