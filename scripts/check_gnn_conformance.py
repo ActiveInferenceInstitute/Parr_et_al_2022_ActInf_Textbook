@@ -217,17 +217,36 @@ def install_offline(executable: str, target: str, pin: dict, bundle) -> bool:
             environment["PIP_CONSTRAINT"] = str(constraints)
             environment["PIP_BUILD_CONSTRAINT"] = str(constraints)
             spec = f"generalized-notation-notation @ git+{bundle.source.as_uri()}@{pin['revision']}"
-            for step in (("--require-hashes", "-r", str(requirements)), ("--upgrade", spec)):
-                completed = subprocess.run(
+            for index, step in enumerate((("--require-hashes", "-r", str(requirements)), ("--upgrade", spec))):
+                with subprocess.Popen(
                     [
                         *command, "install", "--disable-pip-version-check", "--no-input", "--quiet",
                         "--no-index", "--find-links", str(bundle.wheelhouse), "--no-cache-dir",
                         "--no-compile", "--ignore-installed", "--target", target, *step,
                     ],
-                    stdin=subprocess.DEVNULL, capture_output=True, text=True, env=environment,
-                )
-                if completed.returncode != 0:
-                    print((completed.stderr or completed.stdout).strip(), file=sys.stderr)
+                    stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    text=True, env=environment,
+                ) as child:
+                    stdout, stderr = child.communicate()
+                if "GITVAULT_EXECUTION_OUTPUT" in os.environ:
+                    guards = sorted(name for name in os.environ if name.startswith("GITVAULT_"))
+                    observation = {
+                        "schema": "gnn-installer-child-environment/v1",
+                        "step": "locked-wheels" if index == 0 else "pinned-vcs",
+                        "pid": child.pid, "returncode": child.returncode, "completed": True,
+                        "installed-target": target,
+                        "bindings": {name: environment.get(name) for name in (
+                            "PIP_CACHE_DIR", "UV_CACHE_DIR", "TMPDIR", "TEMP", "UV_LINK_MODE", "PIP_CONFIG_FILE",
+                        )},
+                        "pip-option-names": sorted(name for name in environment if name.startswith("PIP_")),
+                        "native-guard-names": guards,
+                        "native-guard-values-preserved": all(environment.get(name) == os.environ[name] for name in guards),
+                    }
+                    receipt = Path(os.environ["GITVAULT_EXECUTION_OUTPUT"]) / f"{destination.name}-installer-environments.jsonl"
+                    with receipt.open("x" if index == 0 else "a", encoding="utf-8") as stream:
+                        stream.write(json.dumps(observation, sort_keys=True) + "\n")
+                if child.returncode != 0:
+                    print((stderr or stdout).strip(), file=sys.stderr)
                     return False
         return True
     except (OSError, ValueError) as error:

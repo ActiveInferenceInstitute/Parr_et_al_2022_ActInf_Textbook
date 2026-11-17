@@ -205,6 +205,13 @@ Under native execution the offline arm allocates a new target inside
 installation evidence. The receipt's `offline-resources.installed-target`
 names it; `retained-installation` is true. Without native output, temporary
 cleanup is unchanged. The online path always retains its original cleanup.
+Native output also retains `<installed-target-name>-installer-environments.jsonl`:
+one completed observation for each original pip child (locked wheels, then pinned
+VCS), with its actual PID/return code and cache/config/temporary bindings. Native
+guard values are compared with the caller and only the comparison and names are
+recorded, never secret values. Both successful records are required to establish
+the original installer's environment preservation; setup-child observations do
+not substitute for them. Launch or observation-write failures remain failures.
 
 After setup, final freeze and independent review, run the original arm through
 native `execute --classification test` offline admission. Do not run tests under
